@@ -1,5 +1,3 @@
-using System;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -7,17 +5,19 @@ using UnityEngine.UIElements;
 
 public class ScriptColorizerWindow : EditorWindow
 {
-    [SerializeField]
-    private VisualTreeAsset m_VisualTreeAsset = default;
-
+    private ColorField colorField;
     private Image previewImage;
+    private IconGenerator iconGenerator;
+    private IconApplier iconApplier;
 
-    [MenuItem("Window/Script Colorizer")]
+
+    [MenuItem("Color Me/Script Colorizer")]
     public static void ShowWindow()
     {
-        ScriptColorizerWindow wnd = GetWindow<ScriptColorizerWindow>();
+        EditorWindow window = CreateInstance<ScriptColorizerWindow>();
         Texture icon = EditorGUIUtility.IconContent("ClothInspector.PaintTool").image;
-        wnd.titleContent = new GUIContent("Script Colorizer", icon);
+        window.titleContent = new GUIContent("Script Colorizer", icon);
+        window.Show();
     }
 
     public void CreateGUI()
@@ -25,10 +25,18 @@ public class ScriptColorizerWindow : EditorWindow
         // Each editor window contains a root VisualElement object
         VisualElement root = rootVisualElement;
 
-        // Color Picker
-        ColorField colorField = new()
+        // Preview Thumbnail
+        iconGenerator ??= new IconGenerator();
+        previewImage = new Image
         {
-            value = new Color(0.5f, 0.5f, 0.5f, 1.0f),
+            sprite = iconGenerator.GetIconPreview(Color.white)
+        };
+        root.Add(previewImage);
+
+        // Color Picker
+        colorField = new ColorField()
+        {
+            value = new Color(1, 1, 1, 1),
             showAlpha = true,
             showEyeDropper = true,
             hdr = true,
@@ -44,23 +52,24 @@ public class ScriptColorizerWindow : EditorWindow
         Button resetButton = new(() => { RemoveColorizedIcon(); }) { text = "Reset" };
         root.Add(resetButton);
 
-        // Preview Thumbnail
-        root.Add(previewImage);
+
     }
 
     private void UpdatePreview(ChangeEvent<Color> evt)
     {
-        Debug.Log(evt.newValue);
-        // TODO: Call method that returns Sprite & assign to previewImage.sprite
+        previewImage.sprite = iconGenerator.GetIconPreview(evt.newValue);
     }
 
     private void ApplyColorizedIcon()
     {
-        Debug.Log("Apply Clicked!");
+        string iconFilePath = iconGenerator.SaveIcon(colorField.value);
+        iconApplier ??= new IconApplier();
+        iconApplier.ChangeIcon(iconFilePath);
     }
 
     private void RemoveColorizedIcon()
     {
-        Debug.Log("Reset Clicked!");
+        iconApplier ??= new IconApplier();
+        iconApplier.ResetIcon();
     }
 }
