@@ -11,7 +11,7 @@ public class ScriptColorizerWindow : EditorWindow
     private IconApplier iconApplier;
 
 
-    [MenuItem("Color Me/Script Colorizer")]
+    [MenuItem("Assets/Script Colorizer/Tint It")]
     public static void ShowWindow()
     {
         EditorWindow window = CreateInstance<ScriptColorizerWindow>();
@@ -51,8 +51,6 @@ public class ScriptColorizerWindow : EditorWindow
         // Remove Color Button
         Button resetButton = new(() => { RemoveColorizedIcon(); }) { text = "Reset" };
         root.Add(resetButton);
-
-
     }
 
     private void UpdatePreview(ChangeEvent<Color> evt)
@@ -62,7 +60,10 @@ public class ScriptColorizerWindow : EditorWindow
 
     private void ApplyColorizedIcon()
     {
-        string iconFilePath = iconGenerator.SaveIcon(colorField.value);
+        string iconFilePath = null;
+        if (colorField.value != Color.white)
+            iconFilePath = iconGenerator.SaveIcon(colorField.value);
+
         iconApplier ??= new IconApplier();
         iconApplier.ChangeIcon(iconFilePath);
     }
