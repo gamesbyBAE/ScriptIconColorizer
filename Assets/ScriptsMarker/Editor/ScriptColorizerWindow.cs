@@ -14,10 +14,17 @@ public class ScriptColorizerWindow : EditorWindow
     [MenuItem("Assets/Script Colorizer/Tint It")]
     public static void ShowWindow()
     {
-        EditorWindow window = CreateInstance<ScriptColorizerWindow>();
+        ScriptColorizerWindow window = GetWindow<ScriptColorizerWindow>(true);
+        window.maxSize = new Vector2(240, 350);
+
+        // Setting icon to the window
         Texture icon = EditorGUIUtility.IconContent("ClothInspector.PaintTool").image;
         window.titleContent = new GUIContent("Script Colorizer", icon);
-        window.Show();
+
+        // 1. Non-dockable
+        // 2. Always on top
+        // 3. Prohibits interaction with the Editor until this window is closed.
+        window.ShowModalUtility();
     }
 
     public void CreateGUI()
@@ -29,7 +36,8 @@ public class ScriptColorizerWindow : EditorWindow
         iconGenerator ??= new IconGenerator();
         previewImage = new Image
         {
-            sprite = iconGenerator.GetIconPreview(Color.white)
+            sprite = iconGenerator.GetIconPreview(Color.white),
+            viewDataKey = "lastGeneratedPreview" // Responsible for data persistence
         };
         root.Add(previewImage);
 
@@ -40,6 +48,7 @@ public class ScriptColorizerWindow : EditorWindow
             showAlpha = true,
             showEyeDropper = true,
             hdr = true,
+            viewDataKey = "lastSelectedColor"
         };
         colorField.RegisterValueChangedCallback(UpdatePreview);
         root.Add(colorField);

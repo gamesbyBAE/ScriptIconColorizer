@@ -4,32 +4,44 @@ using UnityEngine;
 
 public class IconGenerator
 {
-    private readonly string iconName = "d_cs Script Icon";
-    private readonly string iconsDirName = "Assets/ScriptsMarker/Icons";
-    private readonly string fileName = "icon_{0}";
-    private readonly Texture2D iconDefault;
-    private Texture2D iconTinted;
+    private Texture2D tintedIconTexture;
+
+    private readonly Color32[] defaultIconPixels;
+    private readonly int defaultIconWidth, defaultIconHeight;
+
     private readonly Rect previewSpriteRect;
     private readonly Vector2 previewSpritePivot;
     private readonly float previewSpritePixelPerUnit;
 
+    private readonly string iconName = "d_cs Script Icon";
+    private readonly string iconsDirName = "Assets/ScriptsMarker/Icons";
+    private readonly string fileName = "icon_{0}";
+
     public IconGenerator()
     {
-        iconDefault = CopyTexture((Texture2D)EditorGUIUtility.IconContent(iconName).image);
-        previewSpriteRect = new Rect(0.0f, 0.0f, iconDefault.width, iconDefault.height);
+        Texture2D defaultIcon = CopyTexture((Texture2D)EditorGUIUtility.IconContent(iconName).image);
+
+        defaultIconWidth = defaultIcon.width;
+        defaultIconHeight = defaultIcon.height;
+
+        defaultIconPixels = new Color32[defaultIcon.width * defaultIcon.height];
+        defaultIconPixels = defaultIcon.GetPixels32();
+
+        previewSpriteRect = new Rect(0.0f, 0.0f, defaultIcon.width, defaultIcon.height);
         previewSpritePivot = new Vector2(0.5f, 0.5f);
         previewSpritePixelPerUnit = 100f;
     }
 
     public Sprite GetIconPreview(Color tintColor)
     {
-        iconTinted = TintTexture(iconDefault, tintColor);
-        return Sprite.Create(iconTinted, previewSpriteRect, previewSpritePivot, previewSpritePixelPerUnit);
+        tintedIconTexture = TintTexture(tintColor);
+        return Sprite.Create(tintedIconTexture, previewSpriteRect, previewSpritePivot, previewSpritePixelPerUnit);
     }
 
     public string SaveIcon(Color tintColor)
     {
-        return SaveTextureToDisk(iconTinted, string.Format(fileName, ColorUtility.ToHtmlStringRGBA(tintColor)));
+        string iconName = string.Format(fileName, ColorUtility.ToHtmlStringRGBA(tintColor));
+        return SaveTextureToDisk(tintedIconTexture, iconName);
     }
 
     private Texture2D CopyTexture(Texture2D icon)
@@ -39,26 +51,16 @@ public class IconGenerator
         return tex;
     }
 
-    // TODO: Optimise generating of 'pixels' array.
-    // TODO: Cache using Texture2D.GetPixels and loop everytime?
-    private Texture2D TintTexture(Texture2D texture2D, Color tint)
+    private Texture2D TintTexture(Color tint)
     {
-        int width = texture2D.width;
-        int height = texture2D.height;
+        // Tinting & storing the pixels.
+        Color32[] tintedPixels = new Color32[defaultIconPixels.Length];
+        for (int i = 0; i < defaultIconPixels.Length; i++)
+            tintedPixels[i] = defaultIconPixels[i] * tint;
 
-        int pixelIndex = 0;
-        Color32[] pixels = new Color32[width * height];
-        for (int i = 0; i < width; i++)
-        {
-            for (int j = 0; j < height; j++)
-            {
-                pixels[pixelIndex] = texture2D.GetPixel(j, i) * tint;
-                pixelIndex++;
-            }
-        }
-
-        Texture2D tintedTex = new(width, height);
-        tintedTex.SetPixels32(pixels);
+        // New texture using the tinted pixels.
+        Texture2D tintedTex = new(defaultIconWidth, defaultIconHeight);
+        tintedTex.SetPixels32(tintedPixels);
         tintedTex.Apply();
 
         return tintedTex;
