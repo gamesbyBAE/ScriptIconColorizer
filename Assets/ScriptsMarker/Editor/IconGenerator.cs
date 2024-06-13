@@ -2,83 +2,86 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-public class IconGenerator
+namespace BasementExperiments.ScriptColorizer
 {
-    private Texture2D tintedIconTexture;
-
-    private readonly Color32[] defaultIconPixels;
-    private readonly int defaultIconWidth, defaultIconHeight;
-
-    private readonly Rect previewSpriteRect;
-    private readonly Vector2 previewSpritePivot;
-    private readonly float previewSpritePixelPerUnit;
-
-    private readonly string iconName = "d_cs Script Icon";
-    private readonly string iconsDirName = "Assets/ScriptsMarker/Icons";
-    private readonly string fileName = "icon_{0}";
-
-    public IconGenerator()
+    public class IconGenerator
     {
-        Texture2D defaultIcon = CopyTexture((Texture2D)EditorGUIUtility.IconContent(iconName).image);
+        private Texture2D tintedIconTexture;
 
-        defaultIconWidth = defaultIcon.width;
-        defaultIconHeight = defaultIcon.height;
+        private readonly Color32[] defaultIconPixels;
+        private readonly int defaultIconWidth, defaultIconHeight;
 
-        defaultIconPixels = new Color32[defaultIcon.width * defaultIcon.height];
-        defaultIconPixels = defaultIcon.GetPixels32();
+        private readonly Rect previewSpriteRect;
+        private readonly Vector2 previewSpritePivot;
+        private readonly float previewSpritePixelPerUnit;
 
-        previewSpriteRect = new Rect(0.0f, 0.0f, defaultIcon.width, defaultIcon.height);
-        previewSpritePivot = new Vector2(0.5f, 0.5f);
-        previewSpritePixelPerUnit = 100f;
-    }
+        private readonly string iconName = "d_cs Script Icon";
+        private readonly string iconsDirName = "Assets/ScriptsMarker/Icons";
+        private readonly string fileName = "icon_{0}";
 
-    public Sprite GetIconPreview(Color tintColor)
-    {
-        tintedIconTexture = TintTexture(tintColor);
-        return Sprite.Create(tintedIconTexture, previewSpriteRect, previewSpritePivot, previewSpritePixelPerUnit);
-    }
-
-    public string SaveIcon(Color tintColor)
-    {
-        string iconName = string.Format(fileName, ColorUtility.ToHtmlStringRGBA(tintColor));
-        return SaveTextureToDisk(tintedIconTexture, iconName);
-    }
-
-    private Texture2D CopyTexture(Texture2D icon)
-    {
-        var tex = new Texture2D(icon.width, icon.height, icon.format, icon.mipmapCount > 1);
-        Graphics.CopyTexture(icon, tex);
-        return tex;
-    }
-
-    private Texture2D TintTexture(Color tint)
-    {
-        // Tinting & storing the pixels.
-        Color32[] tintedPixels = new Color32[defaultIconPixels.Length];
-        for (int i = 0; i < defaultIconPixels.Length; i++)
-            tintedPixels[i] = defaultIconPixels[i] * tint;
-
-        // New texture using the tinted pixels.
-        Texture2D tintedTex = new(defaultIconWidth, defaultIconHeight);
-        tintedTex.SetPixels32(tintedPixels);
-        tintedTex.Apply();
-
-        return tintedTex;
-    }
-
-    private string SaveTextureToDisk(Texture2D textureToSave, string fileName, string fileExtension = "png")
-    {
-        // Creates directory if doesn't exist.
-        Directory.CreateDirectory(iconsDirName);
-
-        string filePath = Path.Combine(iconsDirName, $"{fileName}.{fileExtension}");
-
-        if (!File.Exists(filePath))
+        public IconGenerator()
         {
-            File.WriteAllBytes(filePath, textureToSave.EncodeToPNG());
-            AssetDatabase.Refresh();
+            Texture2D defaultIcon = CopyTexture((Texture2D)EditorGUIUtility.IconContent(iconName).image);
+
+            defaultIconWidth = defaultIcon.width;
+            defaultIconHeight = defaultIcon.height;
+
+            defaultIconPixels = new Color32[defaultIcon.width * defaultIcon.height];
+            defaultIconPixels = defaultIcon.GetPixels32();
+
+            previewSpriteRect = new Rect(0.0f, 0.0f, defaultIcon.width, defaultIcon.height);
+            previewSpritePivot = new Vector2(0.5f, 0.5f);
+            previewSpritePixelPerUnit = 100f;
         }
 
-        return filePath;
+        public Sprite GetIconPreview(Color tintColor)
+        {
+            tintedIconTexture = TintTexture(tintColor);
+            return Sprite.Create(tintedIconTexture, previewSpriteRect, previewSpritePivot, previewSpritePixelPerUnit);
+        }
+
+        public string SaveIcon(Color tintColor)
+        {
+            string iconName = string.Format(fileName, ColorUtility.ToHtmlStringRGBA(tintColor));
+            return SaveTextureToDisk(tintedIconTexture, iconName);
+        }
+
+        private Texture2D CopyTexture(Texture2D icon)
+        {
+            var tex = new Texture2D(icon.width, icon.height, icon.format, icon.mipmapCount > 1);
+            Graphics.CopyTexture(icon, tex);
+            return tex;
+        }
+
+        private Texture2D TintTexture(Color tint)
+        {
+            // Tinting & storing the pixels.
+            Color32[] tintedPixels = new Color32[defaultIconPixels.Length];
+            for (int i = 0; i < defaultIconPixels.Length; i++)
+                tintedPixels[i] = defaultIconPixels[i] * tint;
+
+            // New texture using the tinted pixels.
+            Texture2D tintedTex = new(defaultIconWidth, defaultIconHeight);
+            tintedTex.SetPixels32(tintedPixels);
+            tintedTex.Apply();
+
+            return tintedTex;
+        }
+
+        private string SaveTextureToDisk(Texture2D textureToSave, string fileName, string fileExtension = "png")
+        {
+            // Creates directory if doesn't exist.
+            Directory.CreateDirectory(iconsDirName);
+
+            string filePath = Path.Combine(iconsDirName, $"{fileName}.{fileExtension}");
+
+            if (!File.Exists(filePath))
+            {
+                File.WriteAllBytes(filePath, textureToSave.EncodeToPNG());
+                AssetDatabase.Refresh();
+            }
+
+            return filePath;
+        }
     }
 }
