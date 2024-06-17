@@ -24,6 +24,7 @@ namespace BasementExperiments.ScriptColorizer
                 return;
             }
 
+            // All this so the reimports are done only at the end.
             try
             {
                 AssetDatabase.StartAssetEditing();

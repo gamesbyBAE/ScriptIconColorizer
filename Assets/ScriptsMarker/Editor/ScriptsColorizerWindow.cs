@@ -24,8 +24,7 @@ namespace BasementExperiments.ScriptColorizer
             // 1. Non-dockable
             // 2. Always on top
             // 3. Prohibits interaction with the Editor until this window is closed.
-            // window.ShowModalUtility();
-            window.ShowUtility();
+            window.ShowModalUtility();
         }
 
         private void CreateGUI()
@@ -33,7 +32,7 @@ namespace BasementExperiments.ScriptColorizer
             // Each editor window contains a root VisualElement object
             VisualElement root = rootVisualElement;
 
-            // Preview Thumbnail
+            // PREVIEW THUMBNAIL
             iconGenerator ??= new IconGenerator();
             previewImage = new Image
             {
@@ -42,7 +41,7 @@ namespace BasementExperiments.ScriptColorizer
             };
             root.Add(previewImage);
 
-            // Color Picker
+            // COLOR PICKER
             colorField = new ColorField()
             {
                 value = new Color(1, 1, 1, 1),
@@ -56,10 +55,17 @@ namespace BasementExperiments.ScriptColorizer
             colorField.RegisterValueChangedCallback(UpdatePreview);
             root.Add(colorField);
 
-            // Apply Button
-            Button applyButton = new(() => { ApplyColorizedIcon(); }) { text = "Apply" };
-            applyButton.style.paddingLeft = 16; //TODO: Fix Button padding
-            applyButton.style.paddingRight = 16;
+            // APPLY BUTTON
+            Button applyButton = new(() => { ApplyColorizedIcon(); }) { text = "APPLY" };
+            applyButton.style.marginLeft = 55;
+            applyButton.style.marginRight = 55;
+            applyButton.style.marginBottom = 25;
+            applyButton.style.marginTop = 15;
+            applyButton.style.borderBottomLeftRadius = 10;
+            applyButton.style.borderBottomRightRadius = 10;
+            applyButton.style.paddingBottom = 8;
+            applyButton.style.paddingTop = 8;
+            applyButton.style.fontSize = 15;
             root.Add(applyButton);
         }
 
