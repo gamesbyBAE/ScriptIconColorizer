@@ -4,9 +4,6 @@
   "displayName": "Script Colorizer",
   "description": "Editor util to customise scripts icon color.",
   "unity": "2020.1",
-  "documentationUrl": "https://example.com/",
-  "changelogUrl": "https://example.com/changelog.html",
-  "licensesUrl": "https://example.com/licensing.html",
   "keywords": [
     "utility",
     "scripts",
