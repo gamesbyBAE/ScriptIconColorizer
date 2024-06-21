@@ -16,7 +16,7 @@ namespace BasementExperiments.ScriptIconColorizer
         private readonly float previewSpritePixelPerUnit;
 
         private readonly string defaultIconName = "d_cs Script Icon";
-        private readonly string iconsDirName = "Packages/com.basementexperiments.scriptcolorizer/Icons";
+        private readonly string iconsDirName = "Packages/com.basementexperiments.scripticoncolorizer/Icons";
         private readonly string iconName = "icon_{0}";
 
         public IconGenerator()

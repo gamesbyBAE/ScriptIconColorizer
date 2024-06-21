@@ -22,7 +22,7 @@ namespace BasementExperiments.ScriptIconColorizer
 
             // Setting icon to the window
             Texture icon = EditorGUIUtility.IconContent("ClothInspector.PaintTool").image;
-            window.titleContent = new GUIContent("Script Colorizer", icon);
+            window.titleContent = new GUIContent("Script Icon Colorizer", icon);
 
             // 1. Non-dockable
             // 2. Always on top
