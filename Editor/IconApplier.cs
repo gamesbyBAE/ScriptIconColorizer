@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace BasementExperiments.ScriptColorizer
+namespace BasementExperiments.ScriptIconColorizer
 {
     public class IconApplier
     {
@@ -20,11 +20,11 @@ namespace BasementExperiments.ScriptColorizer
             Object[] selectedScripts = Selection.GetFiltered(typeof(MonoScript), SelectionMode.TopLevel);
             if (selectedScripts == null || selectedScripts.Length == 0)
             {
-                Debug.LogWarning("No SCRIPT selected!");
+                Debug.LogError("Icon Change Failed: No SCRIPT selected!");
                 return;
             }
 
-            // All this so the reimports are done only at the end.
+            // Batching reimports so that they are executed only at the end.
             try
             {
                 AssetDatabase.StartAssetEditing();

@@ -1,9 +1,9 @@
 {
-  "name": "com.basementexperiments.scriptcolorizer",
-  "version": "0.0.1",
-  "displayName": "Script Colorizer",
+  "name": "com.basementexperiments.scripticoncolorizer",
+  "version": "0.0.3",
+  "displayName": "Script Icon Colorizer",
   "description": "Editor util to customise scripts icon color.",
-  "unity": "2020.1",
+  "unity": "2021.3",
   "keywords": [
     "utility",
     "scripts",

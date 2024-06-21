@@ -1,6 +1,6 @@
 {
-    "name": "BasementExperiments.ScriptColorizer.Editor",
-    "rootNamespace": "BasementExperiments.ScriptColorizer",
+    "name": "BasementExperiments.ScriptIconColorizer.Editor",
+    "rootNamespace": "BasementExperiments.ScriptIconColorizer",
     "references": [],
     "includePlatforms": [
         "Editor"

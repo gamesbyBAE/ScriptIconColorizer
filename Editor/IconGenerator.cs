@@ -2,7 +2,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace BasementExperiments.ScriptColorizer
+namespace BasementExperiments.ScriptIconColorizer
 {
     public class IconGenerator
     {
@@ -15,13 +15,13 @@ namespace BasementExperiments.ScriptColorizer
         private readonly Vector2 previewSpritePivot;
         private readonly float previewSpritePixelPerUnit;
 
-        private readonly string iconName = "d_cs Script Icon";
-        private readonly string iconsDirName = "Assets/ScriptsMarker/Icons";
-        private readonly string fileName = "icon_{0}";
+        private readonly string defaultIconName = "d_cs Script Icon";
+        private readonly string iconsDirName = "Packages/com.basementexperiments.scriptcolorizer/Icons";
+        private readonly string iconName = "icon_{0}";
 
         public IconGenerator()
         {
-            Texture2D defaultIcon = CopyTexture((Texture2D)EditorGUIUtility.IconContent(iconName).image);
+            Texture2D defaultIcon = CopyTexture((Texture2D)EditorGUIUtility.IconContent(defaultIconName).image);
 
             defaultIconWidth = defaultIcon.width;
             defaultIconHeight = defaultIcon.height;
@@ -42,7 +42,7 @@ namespace BasementExperiments.ScriptColorizer
 
         public string SaveIcon(Color tintColor)
         {
-            string iconName = string.Format(fileName, ColorUtility.ToHtmlStringRGBA(tintColor));
+            string iconName = string.Format(this.iconName, ColorUtility.ToHtmlStringRGBA(tintColor));
             return SaveTextureToDisk(tintedIconTexture, iconName);
         }
 

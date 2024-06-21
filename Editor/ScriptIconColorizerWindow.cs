@@ -3,19 +3,22 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace BasementExperiments.ScriptColorizer
+namespace BasementExperiments.ScriptIconColorizer
 {
-    public class ScriptsColorizerWindow : EditorWindow
+    public class ScriptIconColorizerWindow : EditorWindow
     {
         private ColorField colorField;
         private Image previewImage;
         private IconGenerator iconGenerator;
         private IconApplier iconApplier;
+        private readonly Vector2 defaultWindowSize = new(240, 350);
+        ScriptIconColorizerWindow window;
 
         public void ShowWindow()
         {
-            ScriptsColorizerWindow window = GetWindow<ScriptsColorizerWindow>(true);
-            window.maxSize = new Vector2(240, 350);
+            window = GetWindow<ScriptIconColorizerWindow>(true);
+            window.maxSize = defaultWindowSize;
+            window.minSize = defaultWindowSize;
 
             // Setting icon to the window
             Texture icon = EditorGUIUtility.IconContent("ClothInspector.PaintTool").image;
@@ -29,33 +32,45 @@ namespace BasementExperiments.ScriptColorizer
 
         private void CreateGUI()
         {
-            // Each editor window contains a root VisualElement object
             VisualElement root = rootVisualElement;
+            root.Add(PreviewImage());
+            root.Add(ColorSelector());
+            root.Add(ApplyButton());
+            root.RegisterCallback<GeometryChangedEvent>(FitWindowToContent);
+        }
 
-            // PREVIEW THUMBNAIL
+        private Image PreviewImage()
+        {
             iconGenerator ??= new IconGenerator();
             previewImage = new Image
             {
                 sprite = iconGenerator.GetIconPreview(Color.white),
+                scaleMode = ScaleMode.ScaleToFit,
                 viewDataKey = "lastGeneratedPreview" // Responsible for data persistence
             };
-            root.Add(previewImage);
 
-            // COLOR PICKER
+            return previewImage;
+        }
+
+        private ColorField ColorSelector()
+        {
             colorField = new ColorField()
             {
                 value = new Color(1, 1, 1, 1),
                 showAlpha = true,
                 showEyeDropper = true,
                 hdr = true,
-                viewDataKey = "lastSelectedColor",
+                viewDataKey = "lastSelectedColor", // Responsible for data persistence
             };
             colorField.style.paddingLeft = 16;
             colorField.style.paddingRight = 16;
             colorField.RegisterValueChangedCallback(UpdatePreview);
-            root.Add(colorField);
 
-            // APPLY BUTTON
+            return colorField;
+        }
+
+        private Button ApplyButton()
+        {
             Button applyButton = new(() => { ApplyColorizedIcon(); }) { text = "APPLY" };
             applyButton.style.marginLeft = 55;
             applyButton.style.marginRight = 55;
@@ -66,7 +81,27 @@ namespace BasementExperiments.ScriptColorizer
             applyButton.style.paddingBottom = 8;
             applyButton.style.paddingTop = 8;
             applyButton.style.fontSize = 15;
-            root.Add(applyButton);
+
+            return applyButton;
+        }
+
+
+        // For Editor v2021.3.16f1, default Script icon is substantially smaller than
+        // it is in Editor v2022.3.24f1, hence, resizing this Window.
+        private void FitWindowToContent(GeometryChangedEvent evt)
+        {
+            rootVisualElement.UnregisterCallback<GeometryChangedEvent>(FitWindowToContent);
+
+            float height = 0;
+            foreach (var child in rootVisualElement.Children())
+                height += child.resolvedStyle.height + child.resolvedStyle.marginTop + child.resolvedStyle.marginBottom;
+
+            if (height < defaultWindowSize.y)
+            {
+                Vector2 newSize = new(defaultWindowSize.x, defaultWindowSize.y - (height + 50));
+                window.maxSize = newSize;
+                window.minSize = newSize;
+            }
         }
 
         private void UpdatePreview(ChangeEvent<Color> evt)
