@@ -7,12 +7,13 @@ namespace BasementExperiments.ScriptIconColorizer
 {
     public class ScriptIconColorizerWindow : EditorWindow
     {
+        private ObjectField imagePickerField;
         private ColorField colorField;
         private Image previewImage;
         private IconGenerator iconGenerator;
         private IconApplier iconApplier;
         private readonly Vector2 defaultWindowSize = new(240, 350);
-        ScriptIconColorizerWindow window;
+        private ScriptIconColorizerWindow window;
 
         public void ShowWindow()
         {
@@ -24,19 +25,23 @@ namespace BasementExperiments.ScriptIconColorizer
             Texture icon = EditorGUIUtility.IconContent("ClothInspector.PaintTool").image;
             window.titleContent = new GUIContent("Script Icon Colorizer", icon);
 
-            // 1. Non-dockable
-            // 2. Always on top
-            // 3. Prohibits interaction with the Editor until this window is closed.
-            window.ShowModalUtility();
+            window.ShowUtility();
         }
 
         private void CreateGUI()
         {
             VisualElement root = rootVisualElement;
             root.Add(PreviewImage());
+            root.Add(ImagePicker());
             root.Add(ColorSelector());
             root.Add(ApplyButton());
-            root.RegisterCallback<GeometryChangedEvent>(FitWindowToContent);
+            // root.RegisterCallback<GeometryChangedEvent>(FitWindowToContent);
+        }
+
+        private void OnDestroy()
+        {
+            iconGenerator = null;
+            iconApplier = null;
         }
 
         private Image PreviewImage()
@@ -44,7 +49,7 @@ namespace BasementExperiments.ScriptIconColorizer
             iconGenerator ??= new IconGenerator();
             previewImage = new Image
             {
-                sprite = iconGenerator.GetIconPreview(Color.white),
+                sprite = iconGenerator.GetIconPreview(null),
                 scaleMode = ScaleMode.ScaleToFit,
                 viewDataKey = "lastGeneratedPreview" // Responsible for data persistence
             };
@@ -52,19 +57,28 @@ namespace BasementExperiments.ScriptIconColorizer
             return previewImage;
         }
 
+        private ObjectField ImagePicker()
+        {
+            imagePickerField = new ObjectField("Custom Icon:")
+            {
+                objectType = typeof(Texture2D),
+                viewDataKey = "lastSelectedIcon"
+            };
+            imagePickerField.RegisterValueChangedCallback(OnImageSelectChange);
+
+            return imagePickerField;
+        }
+
         private ColorField ColorSelector()
         {
-            colorField = new ColorField()
+            colorField = new ColorField("Icon Tint: ")
             {
                 value = new Color(1, 1, 1, 1),
-                showAlpha = true,
-                showEyeDropper = true,
-                hdr = true,
                 viewDataKey = "lastSelectedColor", // Responsible for data persistence
             };
-            colorField.style.paddingLeft = 16;
-            colorField.style.paddingRight = 16;
-            colorField.RegisterValueChangedCallback(UpdatePreview);
+            // colorField.style.paddingLeft = 16;
+            // colorField.style.paddingRight = 16;
+            colorField.RegisterValueChangedCallback(OnColorSelectChange);
 
             return colorField;
         }
@@ -104,19 +118,21 @@ namespace BasementExperiments.ScriptIconColorizer
             }
         }
 
-        private void UpdatePreview(ChangeEvent<Color> evt)
+        private void OnImageSelectChange(ChangeEvent<Object> evt)
+        {
+            colorField.SetValueWithoutNotify(Color.white);
+            previewImage.sprite = iconGenerator.GetIconPreview((Texture2D)imagePickerField.value);
+        }
+
+        private void OnColorSelectChange(ChangeEvent<Color> evt)
         {
             previewImage.sprite = iconGenerator.GetIconPreview(evt.newValue);
         }
 
         private void ApplyColorizedIcon()
         {
-            string iconFilePath = null;
-            if (colorField.value != Color.white)
-                iconFilePath = iconGenerator.SaveIcon(colorField.value);
-
             iconApplier ??= new IconApplier();
-            iconApplier.ChangeIcon(iconFilePath);
+            iconApplier.ChangeIcon(iconGenerator.SaveIcon(colorField.value));
         }
     }
 }

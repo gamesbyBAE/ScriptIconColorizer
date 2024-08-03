@@ -5,15 +5,9 @@ namespace BasementExperiments.ScriptIconColorizer
 {
     public class IconApplier
     {
-        public void ChangeIcon(string iconPath)
-        {
-            ApplyIcon(AssetDatabase.LoadAssetAtPath<Texture2D>(iconPath));
-        }
+        public void ChangeIcon(string iconPath) => ApplyIcon(AssetDatabase.LoadAssetAtPath<Texture2D>(iconPath));
 
-        public void ResetIcon()
-        {
-            ApplyIcon(null);
-        }
+        public void ResetIcon() => ApplyIcon(null);
 
         private void ApplyIcon(Texture2D iconToApply)
         {
@@ -29,7 +23,7 @@ namespace BasementExperiments.ScriptIconColorizer
             {
                 AssetDatabase.StartAssetEditing();
                 for (int i = 0; i < selectedScripts.Length; i++)
-                    SetCustomIconOnMonoScript(selectedScripts[i], iconToApply);
+                    SetScriptIcon(selectedScripts[i], iconToApply);
             }
             catch (System.Exception e)
             {
@@ -41,7 +35,7 @@ namespace BasementExperiments.ScriptIconColorizer
             }
         }
 
-        private void SetCustomIconOnMonoScript(Object selectedScript, Texture2D icon)
+        private void SetScriptIcon(Object selectedScript, Texture2D icon)
         {
             string scriptPath = AssetDatabase.GetAssetPath(selectedScript);
             MonoImporter monoImporter = (MonoImporter)AssetImporter.GetAtPath(scriptPath);

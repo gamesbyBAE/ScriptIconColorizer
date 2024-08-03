@@ -6,62 +6,112 @@ namespace BasementExperiments.ScriptIconColorizer
 {
     public class IconGenerator
     {
+        private IconType iconType;
+        private int customTextureInstanceID;
+        private Texture2D textureToTint;
         private Texture2D tintedIconTexture;
 
-        private readonly Color32[] defaultIconPixels;
-        private readonly int defaultIconWidth, defaultIconHeight;
-
-        private readonly Rect previewSpriteRect;
+        private readonly Texture2D defaultIcon;
         private readonly Vector2 previewSpritePivot;
         private readonly float previewSpritePixelPerUnit;
-
         private readonly string defaultIconName = "d_cs Script Icon";
         private readonly string iconsDirName = "Packages/com.basementexperiments.scripticoncolorizer/Icons";
-        private readonly string iconName = "icon_{0}";
+        private readonly string iconDefaultName = "icon_default_{0}";
+        private readonly string iconCustomName = "icon_custom_{0}";
 
         public IconGenerator()
         {
-            Texture2D defaultIcon = CopyTexture((Texture2D)EditorGUIUtility.IconContent(defaultIconName).image);
-
-            defaultIconWidth = defaultIcon.width;
-            defaultIconHeight = defaultIcon.height;
-
-            defaultIconPixels = new Color32[defaultIcon.width * defaultIcon.height];
-            defaultIconPixels = defaultIcon.GetPixels32();
-
-            previewSpriteRect = new Rect(0.0f, 0.0f, defaultIcon.width, defaultIcon.height);
+            defaultIcon = CopyTexture((Texture2D)EditorGUIUtility.IconContent(defaultIconName).image);
             previewSpritePivot = new Vector2(0.5f, 0.5f);
             previewSpritePixelPerUnit = 100f;
         }
 
+        public Sprite GetIconPreview(Texture2D iconSprite)
+        {
+            if (iconSprite)
+            {
+                iconType = IconType.CUSTOM;
+                customTextureInstanceID = iconSprite.GetInstanceID();
+            }
+            else
+            {
+                iconType = IconType.DEFAULT;
+                customTextureInstanceID = int.MinValue;
+            }
+
+            textureToTint = (iconType > IconType.DEFAULT_TINTED) ? CopyTexture(iconSprite) : defaultIcon;
+            Rect textureRect = new(0.0f, 0.0f, textureToTint.width, textureToTint.height);
+            return Sprite.Create(textureToTint, textureRect, previewSpritePivot, previewSpritePixelPerUnit);
+        }
+
         public Sprite GetIconPreview(Color tintColor)
         {
-            tintedIconTexture = TintTexture(tintColor);
-            return Sprite.Create(tintedIconTexture, previewSpriteRect, previewSpritePivot, previewSpritePixelPerUnit);
+            iconType = GetIconTypeBasedOnColor(iconType, tintColor);
+            tintedIconTexture = TintTexture(textureToTint, tintColor);
+            Rect textureRect = new(0.0f, 0.0f, textureToTint.width, textureToTint.height);
+            return Sprite.Create(tintedIconTexture, textureRect, previewSpritePivot, previewSpritePixelPerUnit);
         }
 
         public string SaveIcon(Color tintColor)
         {
-            string iconName = string.Format(this.iconName, ColorUtility.ToHtmlStringRGBA(tintColor));
-            return SaveTextureToDisk(tintedIconTexture, iconName);
+            if (iconType == IconType.CUSTOM)
+            {
+                return AssetDatabase.GetAssetPath(customTextureInstanceID);
+            }
+            else if (iconType == IconType.DEFAULT_TINTED || iconType == IconType.CUSTOM_TINTED)
+            {
+                string iconName = (iconType == IconType.DEFAULT_TINTED) ? iconDefaultName : iconCustomName;
+                iconName = string.Format(iconName, ColorUtility.ToHtmlStringRGBA(tintColor));
+
+                return SaveTextureToDisk(tintedIconTexture, iconName);
+            }
+
+            return null;
         }
 
-        private Texture2D CopyTexture(Texture2D icon)
+        private IconType GetIconTypeBasedOnColor(IconType iconType, Color tintColor)
         {
-            var tex = new Texture2D(icon.width, icon.height, icon.format, icon.mipmapCount > 1);
-            Graphics.CopyTexture(icon, tex);
+            IconType newIconType;
+
+            if (tintColor != Color.white)
+            {
+                newIconType = iconType == IconType.DEFAULT ? IconType.DEFAULT_TINTED
+                            : iconType == IconType.CUSTOM ? IconType.CUSTOM_TINTED
+                            : iconType;
+            }
+            else
+            {
+                newIconType = iconType == IconType.DEFAULT_TINTED ? IconType.DEFAULT
+                            : iconType == IconType.CUSTOM_TINTED ? IconType.CUSTOM
+                            : iconType;
+            }
+
+            return newIconType;
+        }
+
+        /// <summary>
+        /// Copies pixel data from one texture to another.
+        /// </summary>
+        /// <param name="textureToCopy">Texture2D to be copied.</param>
+        /// <returns>Texture2D created by copying pixels.</returns>
+        private Texture2D CopyTexture(Texture2D textureToCopy)
+        {
+            var tex = new Texture2D(textureToCopy.width, textureToCopy.height, textureToCopy.format, textureToCopy.mipmapCount > 1);
+            Graphics.CopyTexture(textureToCopy, tex);
             return tex;
         }
 
-        private Texture2D TintTexture(Color tint)
+        private Texture2D TintTexture(Texture2D textureToTint, Color tintColor)
         {
-            // Tinting & storing the pixels.
-            Color32[] tintedPixels = new Color32[defaultIconPixels.Length];
-            for (int i = 0; i < defaultIconPixels.Length; i++)
-                tintedPixels[i] = defaultIconPixels[i] * tint;
+            if (!textureToTint || tintColor == Color.white) return textureToTint;
+
+            // Tinting & Storing the pixels.
+            Color32[] tintedPixels = textureToTint.GetPixels32();
+            for (int i = 0; i < tintedPixels.Length; i++)
+                tintedPixels[i] *= tintColor;
 
             // New texture using the tinted pixels.
-            Texture2D tintedTex = new(defaultIconWidth, defaultIconHeight);
+            Texture2D tintedTex = new(textureToTint.width, textureToTint.height);
             tintedTex.SetPixels32(tintedPixels);
             tintedTex.Apply();
 
@@ -70,6 +120,8 @@ namespace BasementExperiments.ScriptIconColorizer
 
         private string SaveTextureToDisk(Texture2D textureToSave, string fileName, string fileExtension = "png")
         {
+            if (textureToSave == null) return null;
+
             // Creates directory if doesn't exist.
             Directory.CreateDirectory(iconsDirName);
 
@@ -83,5 +135,13 @@ namespace BasementExperiments.ScriptIconColorizer
 
             return filePath;
         }
+    }
+
+    public enum IconType
+    {
+        DEFAULT,
+        DEFAULT_TINTED,
+        CUSTOM,
+        CUSTOM_TINTED
     }
 }
