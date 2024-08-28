@@ -15,9 +15,12 @@ namespace BasementExperiments.ScriptIconColorizer
         private readonly Vector2 previewSpritePivot;
         private readonly float previewSpritePixelPerUnit;
         private readonly string defaultIconName = "d_cs Script Icon";
-        private readonly string iconsDirName = "Packages/com.basementexperiments.scripticoncolorizer/Icons";
+
+        //TODO: Dynamically handle iconsDirName;
+        // private readonly string iconsDirName = "Packages/com.basementexperiments.scripticoncolorizer/Icons";
+        private readonly string iconsDirName = "Assets/ScriptColorizer/Icons";
         private readonly string iconDefaultName = "icon_default_{0}";
-        private readonly string iconCustomName = "icon_custom_{0}";
+        private readonly string iconCustomName = "icon_{0}_{1}";
 
         public IconGenerator()
         {
@@ -61,7 +64,12 @@ namespace BasementExperiments.ScriptIconColorizer
             else if (iconType == IconType.DEFAULT_TINTED || iconType == IconType.CUSTOM_TINTED)
             {
                 string iconName = (iconType == IconType.DEFAULT_TINTED) ? iconDefaultName : iconCustomName;
-                iconName = string.Format(iconName, ColorUtility.ToHtmlStringRGBA(tintColor));
+
+                if (iconType == IconType.DEFAULT_TINTED)
+                    iconName = string.Format(iconName, ColorUtility.ToHtmlStringRGBA(tintColor));
+                else
+                    iconName = string.Format(iconName, customTextureInstanceID, ColorUtility.ToHtmlStringRGBA(tintColor));
+                //TODO: Find way to name custom tinted icons as per the name of the texture and not instance id.
 
                 return SaveTextureToDisk(tintedIconTexture, iconName);
             }

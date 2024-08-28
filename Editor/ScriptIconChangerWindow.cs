@@ -5,36 +5,43 @@ using UnityEngine.UIElements;
 
 namespace BasementExperiments.ScriptIconColorizer
 {
-    public class ScriptIconColorizerWindow : EditorWindow
+    public class ScriptIconChangerWindow : EditorWindow
     {
         private ObjectField imagePickerField;
         private ColorField colorField;
         private Image previewImage;
         private IconGenerator iconGenerator;
         private IconApplier iconApplier;
-        private readonly Vector2 defaultWindowSize = new(240, 350);
-        private ScriptIconColorizerWindow window;
+        private readonly Vector2 defaultWindowSize = new(300, 350);
+        private ScriptIconChangerWindow window;
+
+        private Texture2D lastSelectedIcon;
 
         public void ShowWindow()
         {
-            window = GetWindow<ScriptIconColorizerWindow>(true);
+            window = GetWindow<ScriptIconChangerWindow>(true);
             window.maxSize = defaultWindowSize;
             window.minSize = defaultWindowSize;
 
-            // Setting icon to the window
+            // Changing the window icon.
             Texture icon = EditorGUIUtility.IconContent("ClothInspector.PaintTool").image;
             window.titleContent = new GUIContent("Script Icon Colorizer", icon);
 
-            window.ShowUtility();
+            // window.ShowUtility();
+            window.Show();
         }
 
         private void CreateGUI()
         {
+            iconApplier ??= new IconApplier();
+            iconGenerator ??= new IconGenerator();
+
             VisualElement root = rootVisualElement;
             root.Add(PreviewImage());
             root.Add(ImagePicker());
             root.Add(ColorSelector());
             root.Add(ApplyButton());
+
             // root.RegisterCallback<GeometryChangedEvent>(FitWindowToContent);
         }
 
@@ -42,18 +49,19 @@ namespace BasementExperiments.ScriptIconColorizer
         {
             iconGenerator = null;
             iconApplier = null;
+
+            previewImage = null;
+
+            imagePickerField?.UnregisterValueChangedCallback(OnImageSelectChange);
+            imagePickerField = null;
+
+            colorField?.UnregisterValueChangedCallback(OnColorSelectChange);
+            colorField = null;
         }
 
         private Image PreviewImage()
         {
-            iconGenerator ??= new IconGenerator();
-            previewImage = new Image
-            {
-                sprite = iconGenerator.GetIconPreview(null),
-                scaleMode = ScaleMode.ScaleToFit,
-                viewDataKey = "lastGeneratedPreview" // Responsible for data persistence
-            };
-
+            previewImage = new Image { scaleMode = ScaleMode.ScaleToFit };
             return previewImage;
         }
 
@@ -62,7 +70,7 @@ namespace BasementExperiments.ScriptIconColorizer
             imagePickerField = new ObjectField("Custom Icon:")
             {
                 objectType = typeof(Texture2D),
-                viewDataKey = "lastSelectedIcon"
+                viewDataKey = "lastSelectedIcon" // Responsible for data persistence
             };
             imagePickerField.RegisterValueChangedCallback(OnImageSelectChange);
 
@@ -118,10 +126,19 @@ namespace BasementExperiments.ScriptIconColorizer
             }
         }
 
+        //TODO: Handle None/null selected to display default icon.
         private void OnImageSelectChange(ChangeEvent<Object> evt)
         {
-            colorField.SetValueWithoutNotify(Color.white);
-            previewImage.sprite = iconGenerator.GetIconPreview((Texture2D)imagePickerField.value);
+            if (!evt.newValue) return;
+
+            if (evt.newValue != evt.previousValue)
+                ResetColorPickerWithoutNotify();
+
+            Texture2D selectedTexture = evt.newValue ? (Texture2D)evt.newValue : null;
+            lastSelectedIcon = selectedTexture;
+            previewImage.sprite = iconGenerator.GetIconPreview(selectedTexture);
+
+            RepaintImagePickerUI();
         }
 
         private void OnColorSelectChange(ChangeEvent<Color> evt)
@@ -131,8 +148,38 @@ namespace BasementExperiments.ScriptIconColorizer
 
         private void ApplyColorizedIcon()
         {
-            iconApplier ??= new IconApplier();
             iconApplier.ChangeIcon(iconGenerator.SaveIcon(colorField.value));
+        }
+
+        /// <summary>
+        /// Repaints the ObjectField with the user selected texture
+        /// without triggering the value change event.
+        /// </summary>
+        private void RepaintImagePickerUI()
+        {
+            /*
+                Necessary because domain reload visually shows 'None' selected
+                but clicking the field or the dot on right shows it actually has
+                a value assigned to it.
+
+                Hence, refreshing/repainting the field to visually reflect the
+                selection for better UX.
+            */
+
+            if (!imagePickerField.value) return;
+
+            Object storedValue = imagePickerField.value;
+            imagePickerField.value = null; // Clearing to force the UI to refresh
+            imagePickerField.SetValueWithoutNotify(storedValue);
+        }
+
+        /// <summary>
+        /// Resets the ColorField to show White color without
+        /// triggering the Value Change Event.
+        /// </summary>
+        private void ResetColorPickerWithoutNotify()
+        {
+            colorField.SetValueWithoutNotify(Color.white);
         }
     }
 }
