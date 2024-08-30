@@ -1,3 +1,5 @@
+// using System;
+using System.Drawing.Printing;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -14,12 +16,13 @@ namespace BasementExperiments.ScriptIconColorizer
         private IconApplier iconApplier;
         private readonly Vector2 defaultWindowSize = new(300, 350);
         private ScriptIconChangerWindow window;
+        float bottomContentHeight;
 
         public void ShowWindow()
         {
             window = GetWindow<ScriptIconChangerWindow>(true);
-            window.maxSize = defaultWindowSize;
-            window.minSize = defaultWindowSize;
+            // window.maxSize = defaultWindowSize;
+            // window.minSize = defaultWindowSize;
 
             // Changing the window icon.
             Texture icon = EditorGUIUtility.IconContent("ClothInspector.PaintTool").image;
@@ -34,12 +37,40 @@ namespace BasementExperiments.ScriptIconColorizer
             iconGenerator ??= new IconGenerator();
 
             VisualElement root = rootVisualElement;
-            root.Add(PreviewImage());
-            root.Add(ImagePicker());
-            root.Add(ColorSelector());
-            root.Add(ApplyButton());
+            root.style.flexDirection = FlexDirection.Column;
+            root.style.justifyContent = Justify.SpaceBetween;
 
-            // root.RegisterCallback<GeometryChangedEvent>(FitWindowToContent);
+            VisualElement imageArea = new();
+            imageArea.style.alignItems = Align.Center;
+            imageArea.style.backgroundColor = new StyleColor(Color.gray);
+            imageArea.style.justifyContent = Justify.Center;
+            // Set a fixed maximum size for the image area
+            imageArea.style.maxHeight = 250;
+            imageArea.style.maxWidth = 250;
+            imageArea.style.height = Length.Percent(100);  // Let it use the remaining height
+            imageArea.style.flexShrink = 0;  // Ensure the area does not shrink
+            root.Add(imageArea);
+            imageArea.Add(PreviewImage());
+
+            VisualElement groupBox = new();
+            // groupBox.style.position = Position.Relative;
+            // groupBox.style.flexGrow = 1;
+            groupBox.style.flexDirection = FlexDirection.Column;
+            // groupBox.style.alignItems = Align.Center;
+            groupBox.style.paddingBottom = 10;
+            // groupBox.style.left = new StyleLength(new Length(25, LengthUnit.Percent));
+            // groupBox.style.right = new StyleLength(new Length(5, LengthUnit.Percent));
+            // groupBox.style.alignContent = Align.Center;
+            // groupBox.style.justifyContent = Justify.Center;
+
+            root.Add(groupBox);
+            groupBox.Add(ImagePicker());
+            groupBox.Add(ColorSelector());
+            groupBox.Add(ApplyButton());
+            bottomContentHeight = groupBox.resolvedStyle.height;
+
+            root.UnregisterCallback<GeometryChangedEvent>(FitWindowToContent);
+            root.RegisterCallback<GeometryChangedEvent>(FitWindowToContent);
         }
 
         private void OnDestroy()
@@ -54,11 +85,22 @@ namespace BasementExperiments.ScriptIconColorizer
 
             colorField?.UnregisterValueChangedCallback(OnColorSelectChange);
             colorField = null;
+
+            rootVisualElement.UnregisterCallback<GeometryChangedEvent>(FitWindowToContent);
         }
 
         private Image PreviewImage()
         {
             previewImage = new Image { scaleMode = ScaleMode.ScaleToFit };
+            // previewImage.style.alignItems = Align.Center;
+            // previewImage.style.backgroundColor = new StyleColor(Color.gray);
+            // previewImage.style.justifyContent = Justify.Center;
+            // // Set a fixed maximum size for the image area
+            // previewImage.style.maxHeight = 250;
+            // previewImage.style.maxWidth = 250;
+            // previewImage.style.height = Length.Percent(100);  // Let it use the remaining height
+            // previewImage.style.flexShrink = 0;  // Ensure the area does not shrink
+
             return previewImage;
         }
 
@@ -69,6 +111,11 @@ namespace BasementExperiments.ScriptIconColorizer
                 objectType = typeof(Texture2D),
                 viewDataKey = "lastSelectedIcon" // Responsible for data persistence
             };
+            imagePickerField.style.position = Position.Relative;
+            imagePickerField.style.marginTop = 12;
+            imagePickerField.style.flexGrow = 0;
+
+
             imagePickerField.RegisterValueChangedCallback(OnImageSelectChange);
 
             return imagePickerField;
@@ -81,6 +128,11 @@ namespace BasementExperiments.ScriptIconColorizer
                 value = new Color(1, 1, 1, 1),
                 viewDataKey = "lastSelectedColor", // Responsible for data persistence
             };
+            // colorField.style.position = Position.Absolute;
+            // colorField.style.marginTop = 12;
+            // colorField.style.bottom = 20;
+            // colorField.style.right = 20;
+
             // colorField.style.paddingLeft = 16;
             // colorField.style.paddingRight = 16;
             colorField.RegisterValueChangedCallback(OnColorSelectChange);
@@ -91,15 +143,19 @@ namespace BasementExperiments.ScriptIconColorizer
         private Button ApplyButton()
         {
             Button applyButton = new(() => { ApplyColorizedIcon(); }) { text = "APPLY" };
-            applyButton.style.marginLeft = 55;
-            applyButton.style.marginRight = 55;
-            applyButton.style.marginBottom = 25;
-            applyButton.style.marginTop = 15;
-            applyButton.style.borderBottomLeftRadius = 10;
-            applyButton.style.borderBottomRightRadius = 10;
-            applyButton.style.paddingBottom = 8;
-            applyButton.style.paddingTop = 8;
-            applyButton.style.fontSize = 15;
+            // applyButton.style.position = Position.Absolute;
+            // applyButton.style.bottom = 10;
+            // applyButton.style.right = 50;
+            // applyButton.style.marginLeft = 55;
+            // applyButton.style.marginRight = 55;
+            // applyButton.style.marginBottom = 25;
+            // applyButton.style.marginTop = 20;
+            // applyButton.style.marginBottom = 20;
+            // applyButton.style.borderBottomLeftRadius = 10;
+            // applyButton.style.borderBottomRightRadius = 10;
+            // applyButton.style.paddingBottom = 8;
+            // applyButton.style.paddingTop = 8;
+            // applyButton.style.fontSize = 15;
 
             return applyButton;
         }
@@ -108,7 +164,13 @@ namespace BasementExperiments.ScriptIconColorizer
         // it is in Editor v2022.3.24f1, hence, resizing this Window.
         private void FitWindowToContent(GeometryChangedEvent evt)
         {
-            rootVisualElement.UnregisterCallback<GeometryChangedEvent>(FitWindowToContent);
+            // return;
+            // rootVisualElement.UnregisterCallback<GeometryChangedEvent>(FitWindowToContent);
+
+            // Vector2 newSize1 = new(defaultWindowSize.x, rootVisualElement.contentRect.height);
+            // window.minSize = newSize1;
+            // Repaint();
+            return;
 
             float height = 0;
             foreach (var child in rootVisualElement.Children())
@@ -130,6 +192,22 @@ namespace BasementExperiments.ScriptIconColorizer
                 ResetColorPickerWithoutNotify();
 
             previewImage.sprite = iconGenerator.GetIconPreview(evt.newValue as Texture2D);
+
+            // ResizeWindow(evt.newValue as Texture2D);
+        }
+
+        private void ResizeWindow(Texture2D texture)
+        {
+            if (!texture) return;
+            rootVisualElement.schedule.Execute(() =>
+            {
+                // Calculate and set the window size based on image and bottom content size
+                float windowWidth = Mathf.Max(texture.width, 200); // Set a minimum width if necessary
+                float windowHeight = texture.height + bottomContentHeight;
+
+                minSize = new Vector2(windowWidth, windowHeight);
+                maxSize = minSize; // This will force the window to resize to the specified dimensions
+            }).ExecuteLater(0); // Execute on the next frame after the layout pass
         }
 
         private void OnColorSelectChange(ChangeEvent<Color> evt)
