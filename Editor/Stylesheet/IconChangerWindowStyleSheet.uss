@@ -1,0 +1,45 @@
+#previewArea {
+    align-items: center;
+    background-color: gray;
+    justify-content: center;
+    max-height: 250px;
+    max-width: 250px;
+    height: 100%;
+    flex-shrink: 0;
+    border-color: #131313;
+    border-width: .1px;
+    border-radius: 8px;
+}
+
+#interactableArea {
+    flex-direction: column;
+    padding-bottom: 10px;
+}
+
+#imagePicker{
+    margin: 12px 10px auto 10px;
+}
+
+#colorSelector {
+    margin: 5px 10px auto 10px;
+}
+
+#applyButton {
+    align-self: center;
+    width: 100px;
+    height: 30px;
+    margin-top: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.unity-object-field__label,
+.unity-color-field__label {
+    padding-right: 10px; /* Reduce the padding to decrease the space between the label and field */
+    margin-right: 0;    /* Ensure there's no extra margin */
+}
+
+.unity-object-field__input,
+.unity-color-field__input{
+    margin-left: -65px;
+}
