@@ -17,7 +17,7 @@ namespace BasementExperiments.ScriptIconColorizer
         private IconApplier iconApplier;
         private IconSaver iconSaver;
 
-        private readonly Vector2 windowSize = new(250, 350);
+        private readonly Vector2 windowSize = new(250, 400);
 
         // Names must match with the one mentioned in the
         // USS to automatically apply custom styles.
@@ -31,25 +31,20 @@ namespace BasementExperiments.ScriptIconColorizer
 
         public void ShowWindow()
         {
-            GetWindow<ScriptIconChangerWindow>(true);
+            ShowUtility();
 
             maxSize = minSize = windowSize;
 
-            // Changing the window's top-left icon.
-            Texture icon = EditorGUIUtility.IconContent("ClothInspector.PaintTool").image;
-            titleContent = new GUIContent("Custom Script Icon", icon);
-
-            ShowUtility();
+            // Changing the window's name and icon.
+            // Note: Icon visible only on a regular dockable window & not on a UtilityWindow.
+            Texture windowIcon = EditorGUIUtility.IconContent("ClothInspector.PaintTool").image;
+            titleContent = new GUIContent("Custom Script Icon", windowIcon);
         }
 
         private void CreateGUI()
         {
             iconGenerator ??= new IconGenerator();
-
-            // Apply the stylesheet.
-            if (customStyleSheet != null)
-                rootVisualElement.styleSheets.Add(customStyleSheet);
-
+            ApplyStyleSheet();
             CreatePreviewArea();
             CreateInteractableArea();
         }
@@ -65,8 +60,19 @@ namespace BasementExperiments.ScriptIconColorizer
             imagePickerField?.UnregisterValueChangedCallback(ChangePreviewImage);
             imagePickerField = null;
 
-            colorSelectorField?.UnregisterValueChangedCallback(ChangePreviewColor);
+            colorSelectorField?.UnregisterValueChangedCallback(ChangePreviewImageTint);
             colorSelectorField = null;
+
+            Button applyButton = rootVisualElement.Query<Button>(applyButtonName);
+            if (applyButton != null) applyButton.clicked -= ApplyNewIcon;
+        }
+
+        private void ApplyStyleSheet()
+        {
+            if (!customStyleSheet)
+                Debug.Log("Custom Style Sheet not assigned!");
+            else
+                rootVisualElement.styleSheets.Add(customStyleSheet);
         }
 
         private void CreatePreviewArea()
@@ -95,7 +101,7 @@ namespace BasementExperiments.ScriptIconColorizer
 
         private ObjectField ImagePicker()
         {
-            imagePickerField = new ObjectField("Custom Icon:")
+            imagePickerField = new ObjectField("Custom Icon")
             {
                 name = imagePickerName,
                 objectType = typeof(Texture2D),
@@ -109,14 +115,14 @@ namespace BasementExperiments.ScriptIconColorizer
 
         private ColorField ColorSelector()
         {
-            colorSelectorField = new ColorField("Icon Tint: ")
+            colorSelectorField = new ColorField("Icon Tint")
             {
                 name = colorSelectorName,
                 value = new Color(1, 1, 1, 1),
                 viewDataKey = "lastSelectedColor", // Responsible for data persistence
             };
 
-            colorSelectorField.RegisterValueChangedCallback(ChangePreviewColor);
+            colorSelectorField.RegisterValueChangedCallback(ChangePreviewImageTint);
 
             return colorSelectorField;
         }
@@ -142,7 +148,7 @@ namespace BasementExperiments.ScriptIconColorizer
             previewImage.sprite = iconGenerator.GetIconPreview(evt.newValue as Texture2D);
         }
 
-        private void ChangePreviewColor(ChangeEvent<Color> evt)
+        private void ChangePreviewImageTint(ChangeEvent<Color> evt)
         {
             previewImage.sprite = iconGenerator.GetIconPreview(evt.newValue);
         }
@@ -170,8 +176,8 @@ namespace BasementExperiments.ScriptIconColorizer
         {
             /*
                 Necessary because domain reload visually shows 'None' selected
-                but clicking the field or the dot on right shows it actually has
-                a value assigned to it.
+                but clicking the field or the dot on the right shows it actually
+                has a value assigned to it.
 
                 Hence, refreshing/repainting the field to visually reflect the
                 selection for better UX.

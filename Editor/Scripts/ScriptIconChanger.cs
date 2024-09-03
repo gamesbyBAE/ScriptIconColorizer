@@ -4,7 +4,6 @@ namespace BasementExperiments.ScriptIconColorizer
 {
     public class ScriptIconChanger : Editor
     {
-
         [MenuItem("Assets/Script Colorizer/Change Icon %&#c", false, 10000)]
         private static void ChangeIcon() => CreateInstance<ScriptIconChangerWindow>().ShowWindow();
 

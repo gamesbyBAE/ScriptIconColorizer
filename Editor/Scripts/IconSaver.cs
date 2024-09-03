@@ -6,9 +6,7 @@ namespace BasementExperiments.ScriptIconColorizer
 {
     public class IconSaver
     {
-        //TODO: Dynamically handle iconsDirName;
         private readonly string iconsDirName = "Packages/com.basementexperiments.scripticoncolorizer/Icons";
-        // private readonly string iconsDirName = "Assets/ScriptColorizer/Icons";
         private readonly string iconDefaultName = "icon_default_{0}";
         private readonly string iconCustomName = "icon_{0}_{1}";
 
@@ -16,8 +14,8 @@ namespace BasementExperiments.ScriptIconColorizer
         {
             switch (iconContext.IconType)
             {
-                case IconType.CUSTOM when iconContext.SelectedTexture:
-                    return AssetDatabase.GetAssetPath(iconContext.SelectedTexture);
+                case IconType.CUSTOM when iconContext.SourceTexture:
+                    return AssetDatabase.GetAssetPath(iconContext.SourceTexture);
 
                 case IconType.DEFAULT_TINTED:
                 case IconType.CUSTOM_TINTED:
@@ -39,7 +37,7 @@ namespace BasementExperiments.ScriptIconColorizer
                     return string.Format(iconName, iconContext.SelectedColorHTMLString);
 
                 case IconType.CUSTOM_TINTED:
-                    string textureName = iconContext.SelectedTexture ? iconContext.SelectedTexture.name : "";
+                    string textureName = iconContext.SourceTexture ? iconContext.SourceTexture.name : "";
                     return string.Format(iconName, textureName, iconContext.SelectedColorHTMLString);
             }
 

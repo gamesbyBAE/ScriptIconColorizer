@@ -5,9 +5,15 @@ namespace BasementExperiments.ScriptIconColorizer
 {
     public class IconApplier
     {
-        public void ChangeIcon(string iconPath) => ApplyIcon(AssetDatabase.LoadAssetAtPath<Texture2D>(iconPath));
+        public void ChangeIcon(string iconPath)
+        {
+            ApplyIcon(AssetDatabase.LoadAssetAtPath<Texture2D>(iconPath));
+        }
 
-        public void ResetIcon() => ApplyIcon(null);
+        public void ResetIcon()
+        {
+            ApplyIcon(null);
+        }
 
         private void ApplyIcon(Texture2D iconToApply)
         {
