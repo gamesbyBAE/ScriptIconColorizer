@@ -9,7 +9,11 @@ namespace BasementExperiments.ScriptIconColorizer
         public string SelectedColorHTMLString { get; }
         public Texture2D TintedTexture { get; }
 
-        public IconContext(IconType iconType, Texture2D sourceTexture, string selectedColorHTMLString, Texture2D tintedTexture)
+        public IconContext(
+            IconType iconType,
+            Texture2D sourceTexture,
+            string selectedColorHTMLString,
+            Texture2D tintedTexture)
         {
             IconType = iconType;
             SourceTexture = sourceTexture;

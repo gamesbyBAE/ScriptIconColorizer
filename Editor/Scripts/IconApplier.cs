@@ -20,7 +20,7 @@ namespace BasementExperiments.ScriptIconColorizer
             Object[] selectedScripts = Selection.GetFiltered(typeof(MonoScript), SelectionMode.TopLevel);
             if (selectedScripts == null || selectedScripts.Length == 0)
             {
-                Debug.LogError("Icon Change Failed: No SCRIPT selected!");
+                Debug.LogError("Icon Change Failed: No SCRIPT assets selected!");
                 return;
             }
 

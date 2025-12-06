@@ -17,6 +17,9 @@ namespace BasementExperiments.ScriptIconColorizer
         public IconGenerator()
         {
             defaultIcon = CopyTexture((Texture2D)EditorGUIUtility.IconContent(defaultIconName).image);
+            if (!defaultIcon)
+                Debug.LogError("Default icon could not be loaded. Make sure you are using Unity Editor.");
+
             previewSpritePivot = new Vector2(0.5f, 0.5f);
             previewSpritePixelPerUnit = 100f;
         }
@@ -25,7 +28,16 @@ namespace BasementExperiments.ScriptIconColorizer
         {
             NewIconType = selectedTexture ? IconType.CUSTOM : IconType.DEFAULT;
 
-            textureToModify = (NewIconType > IconType.DEFAULT_TINTED) ? CopyTexture(selectedTexture) : defaultIcon;
+            textureToModify = NewIconType > IconType.DEFAULT_TINTED
+                ? CopyTexture(selectedTexture)
+                : defaultIcon;
+
+            if (!textureToModify)
+            {
+                Debug.LogError("Failed to copy the texture for preview or default icon not found.");
+                return null;
+            }
+
             return CreateNewSprite(textureToModify);
         }
 
@@ -34,6 +46,13 @@ namespace BasementExperiments.ScriptIconColorizer
             NewIconType = GetIconTypeBasedOnColor(NewIconType, tintColor);
 
             NewTintedTexture = TintTexture(textureToModify, tintColor);
+
+            if (!NewTintedTexture)
+            {
+                Debug.LogError("Failed to tint the texture.");
+                return null;
+            }
+
             return CreateNewSprite(NewTintedTexture);
         }
 
@@ -83,6 +102,12 @@ namespace BasementExperiments.ScriptIconColorizer
         /// <returns>Newly created sprite.</returns>
         private Sprite CreateNewSprite(Texture2D sourceTexture)
         {
+            if (!sourceTexture)
+            {
+                Debug.LogError("Source texture is null, cannot create sprite.");
+                return null;
+            }
+
             Rect textureRect = new(0.0f, 0.0f, sourceTexture.width, sourceTexture.height);
             return Sprite.Create(sourceTexture, textureRect, previewSpritePivot, previewSpritePixelPerUnit);
         }

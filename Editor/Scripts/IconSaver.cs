@@ -7,8 +7,8 @@ namespace BasementExperiments.ScriptIconColorizer
     public class IconSaver
     {
         private readonly string iconsDirName = "Packages/com.basementexperiments.scripticoncolorizer/Icons";
-        private readonly string iconDefaultName = "icon_default_{0}";
-        private readonly string iconCustomName = "icon_{0}_{1}";
+        private readonly string iconDefaultName = "d3rp_default_{0}";
+        private readonly string iconCustomName = "d3rp_{0}_{1}";
 
         public string SaveIcon(IconContext iconContext)
         {
