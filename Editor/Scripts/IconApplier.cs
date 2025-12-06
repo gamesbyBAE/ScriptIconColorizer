@@ -1,26 +1,39 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace BasementExperiments.ScriptIconColorizer
 {
     public class IconApplier
     {
-        public void ChangeIcon(string iconPath)
+        public void ChangeIcon(string iconPath, List<Object> targetScripts)
         {
-            ApplyIcon(AssetDatabase.LoadAssetAtPath<Texture2D>(iconPath));
+            if (string.IsNullOrEmpty(iconPath))
+            {
+                Debug.LogError("Icon Change Failed: Icon path is null!");
+                return;
+            }
+
+            Texture2D iconToApply = AssetDatabase.LoadAssetAtPath<Texture2D>(iconPath);
+            ApplyIcon(iconToApply, targetScripts);
         }
 
         public void ResetIcon()
         {
-            ApplyIcon(null);
+            ApplyIcon(null, Utils.GetSelectedScripts());
         }
 
-        private void ApplyIcon(Texture2D iconToApply)
+        public void ResetIcon(List<Object> targetScripts)
         {
-            Object[] selectedScripts = Selection.GetFiltered(typeof(MonoScript), SelectionMode.TopLevel);
-            if (selectedScripts == null || selectedScripts.Length == 0)
+            ApplyIcon(null, targetScripts);
+        }
+
+        private void ApplyIcon(Texture2D iconToApply, List<Object> targetScripts)
+        {
+            if (targetScripts == null || targetScripts.Count == 0)
             {
-                Debug.LogError("Icon Change Failed: No SCRIPT assets selected!");
+                Debug.LogError("Icon Change Failed: No 'MonoScript' assets selected!");
                 return;
             }
 
@@ -28,8 +41,9 @@ namespace BasementExperiments.ScriptIconColorizer
             try
             {
                 AssetDatabase.StartAssetEditing();
-                for (int i = 0; i < selectedScripts.Length; i++)
-                    SetScriptIcon(selectedScripts[i], iconToApply);
+                for (int i = 0; i < targetScripts.Count; i++)
+                    if (targetScripts[i])
+                        SetScriptIcon(targetScripts[i], iconToApply);
             }
             catch (System.Exception e)
             {

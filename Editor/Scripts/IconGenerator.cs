@@ -43,7 +43,7 @@ namespace BasementExperiments.ScriptIconColorizer
 
         public Sprite GetIconPreview(Color tintColor)
         {
-            NewIconType = GetIconTypeBasedOnColor(NewIconType, tintColor);
+            NewIconType = Utils.GetIconTypeFromColor(NewIconType, tintColor);
 
             NewTintedTexture = TintTexture(textureToModify, tintColor);
 
@@ -73,26 +73,6 @@ namespace BasementExperiments.ScriptIconColorizer
             {
                 throw e;
             }
-        }
-
-        private IconType GetIconTypeBasedOnColor(IconType iconType, Color tintColor)
-        {
-            IconType newIconType;
-
-            if (tintColor != Color.white)
-            {
-                newIconType = iconType == IconType.DEFAULT ? IconType.DEFAULT_TINTED
-                            : iconType == IconType.CUSTOM ? IconType.CUSTOM_TINTED
-                            : iconType;
-            }
-            else
-            {
-                newIconType = iconType == IconType.DEFAULT_TINTED ? IconType.DEFAULT
-                            : iconType == IconType.CUSTOM_TINTED ? IconType.CUSTOM
-                            : iconType;
-            }
-
-            return newIconType;
         }
 
         /// <summary>

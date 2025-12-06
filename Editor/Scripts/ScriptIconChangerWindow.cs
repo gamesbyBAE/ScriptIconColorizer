@@ -9,15 +9,16 @@ namespace BasementExperiments.ScriptIconColorizer
     {
         [SerializeField] private StyleSheet customStyleSheet;
 
+        private Image previewImage;
         private ObjectField imagePickerField;
         private ColorField colorSelectorField;
-        private Image previewImage;
+        private TargetsListView targetsListView;
 
         private IconGenerator iconGenerator;
         private IconApplier iconApplier;
         private IconSaver iconSaver;
 
-        private readonly Vector2 windowSize = new(250, 400);
+        private readonly Vector2 windowSize = new(250, 700);
 
         // Names must match with the one mentioned in the
         // USS to automatically apply custom styles.
@@ -26,7 +27,9 @@ namespace BasementExperiments.ScriptIconColorizer
         private readonly string interactableAreaName = "interactableArea";
         private readonly string imagePickerName = "imagePicker";
         private readonly string colorSelectorName = "colorSelector";
+        private readonly string scriptListAreaName = "scriptListArea";
         private readonly string applyButtonName = "applyButton";
+        private readonly string resetButtonName = "resetButton";
         #endregion
 
         public void ShowWindow()
@@ -63,6 +66,9 @@ namespace BasementExperiments.ScriptIconColorizer
             colorSelectorField?.UnregisterValueChangedCallback(ChangePreviewImageTint);
             colorSelectorField = null;
 
+            targetsListView?.Cleanup();
+            targetsListView = null;
+
             Button applyButton = rootVisualElement.Query<Button>(applyButtonName);
             if (applyButton != null) applyButton.clicked -= ApplyNewIcon;
         }
@@ -88,7 +94,9 @@ namespace BasementExperiments.ScriptIconColorizer
             VisualElement controlsArea = new() { name = interactableAreaName };
             controlsArea.Add(ImagePicker());
             controlsArea.Add(ColorSelector());
+            controlsArea.Add(CreateScriptListArea());
             controlsArea.Add(ApplyButton());
+            controlsArea.Add(ResetButton());
 
             rootVisualElement.Add(controlsArea);
         }
@@ -127,6 +135,16 @@ namespace BasementExperiments.ScriptIconColorizer
             return colorSelectorField;
         }
 
+        private VisualElement CreateScriptListArea()
+        {
+            targetsListView = new TargetsListView();
+
+            VisualElement scriptListArea = new() { name = scriptListAreaName };
+            scriptListArea.Add(targetsListView.TargetScriptsListView);
+
+            return scriptListArea;
+        }
+
         private Button ApplyButton()
         {
             Button applyButton = new(() => { ApplyNewIcon(); })
@@ -136,6 +154,17 @@ namespace BasementExperiments.ScriptIconColorizer
             };
 
             return applyButton;
+        }
+
+        private Button ResetButton()
+        {
+            Button resetButton = new(() => { ResetIcon(); })
+            {
+                name = resetButtonName,
+                text = "Reset to Default"
+            };
+
+            return resetButton;
         }
 
         private void ChangePreviewImage(ChangeEvent<Object> evt)
@@ -155,17 +184,23 @@ namespace BasementExperiments.ScriptIconColorizer
 
         private void ApplyNewIcon()
         {
-            IconContext iconContext = new(iconGenerator.NewIconType,
-                                          imagePickerField.value as Texture2D,
-                                          ColorUtility.ToHtmlStringRGBA(colorSelectorField.value),
-                                          iconGenerator.NewTintedTexture
-                                          );
+            IconContext iconContext = new(
+                iconGenerator.NewIconType,
+                imagePickerField.value as Texture2D,
+                ColorUtility.ToHtmlStringRGBA(colorSelectorField.value),
+                iconGenerator.NewTintedTexture);
 
             iconSaver ??= new IconSaver();
             string iconPath = iconSaver.SaveIcon(iconContext);
 
             iconApplier ??= new IconApplier();
-            iconApplier.ChangeIcon(iconPath);
+            iconApplier.ChangeIcon(iconPath, targetsListView.TargetScripts);
+        }
+
+        private void ResetIcon()
+        {
+            iconApplier ??= new IconApplier();
+            iconApplier.ResetIcon(targetsListView.TargetScripts);
         }
 
         /// <summary>
