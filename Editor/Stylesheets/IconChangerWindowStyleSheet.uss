@@ -53,6 +53,19 @@
     color: white;
 }
 
+#resetButton {
+    align-self: center;
+    width: 100px;
+    height: 30px;
+    margin-top: 20px;
+    justify-content: center;
+    align-items: center;
+    background-color: #af4c5c;
+    -unity-font-style: bold;
+    font-size: 16px;
+    color: white;
+}
+
 .unity-object-field__label,
 .unity-color-field__label{
     font-size: 13px;

@@ -34,5 +34,10 @@ namespace BasementExperiments.ScriptIconColorizer
 
             return newIconType;
         }
+
+        public static bool NeedsTinting(IconType iconType)
+        {
+            return iconType == IconType.DEFAULT_TINTED || iconType == IconType.CUSTOM_TINTED;
+        }
     }
 }

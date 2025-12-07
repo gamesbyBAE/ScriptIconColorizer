@@ -2,25 +2,25 @@ using UnityEngine;
 
 namespace BasementExperiments.ScriptIconColorizer
 {
+    public enum IconType { DEFAULT, DEFAULT_TINTED, CUSTOM, CUSTOM_TINTED }
+
     public class IconContext
     {
         public IconType IconType { get; }
-        public Texture2D SourceTexture { get; }
-        public string SelectedColorHTMLString { get; }
-        public Texture2D TintedTexture { get; }
+        public Color TintColor { get; }
+        public Texture2D IconTexture { get; }
+        public string TextureName { get; }
 
         public IconContext(
             IconType iconType,
-            Texture2D sourceTexture,
-            string selectedColorHTMLString,
-            Texture2D tintedTexture)
+            Color tintColor,
+            Texture2D iconTexture,
+            string textureName)
         {
             IconType = iconType;
-            SourceTexture = sourceTexture;
-            SelectedColorHTMLString = selectedColorHTMLString;
-            TintedTexture = tintedTexture;
+            TintColor = tintColor;
+            IconTexture = iconTexture;
+            TextureName = textureName;
         }
     }
-
-    public enum IconType { DEFAULT, DEFAULT_TINTED, CUSTOM, CUSTOM_TINTED }
 }

@@ -7,12 +7,15 @@ using UnityEngine.UIElements;
 
 namespace BasementExperiments.ScriptIconColorizer
 {
-    public class TargetsListView
+    public class TargetsListView : BaseView
     {
-        public ListView TargetScriptsListView { get; private set; }
+        private ListView targetScriptsListView;
         public List<Object> TargetScripts { get; private set; }
 
-        public TargetsListView()
+        private readonly VisualElement rootElement;
+        public override VisualElement RootElement => rootElement;
+
+        public TargetsListView(string ussClassName) : base(ussClassName)
         {
             var selectedScripts = Utils.GetSelectedScripts();
             if (selectedScripts != null)
@@ -21,7 +24,7 @@ namespace BasementExperiments.ScriptIconColorizer
                 TargetScripts = new List<Object>();
 
 
-            TargetScriptsListView = new ListView(
+            targetScriptsListView = new ListView(
                 itemsSource: TargetScripts,
                 itemHeight: 40,
                 makeItem: MakeScriptFieldItem,
@@ -40,23 +43,26 @@ namespace BasementExperiments.ScriptIconColorizer
                 horizontalScrollingEnabled = false,
             };
 
+            rootElement = new VisualElement() { name = ussClassName };
+            rootElement.Add(targetScriptsListView);
+
             RegisterDragAndDropHandlers();
         }
 
         private void RegisterDragAndDropHandlers()
         {
-            if (TargetScriptsListView == null) return;
-            TargetScriptsListView.RegisterCallback<DragLeaveEvent>(OnDragLeave);
-            TargetScriptsListView.RegisterCallback<DragUpdatedEvent>(OnDragUpdated);
-            TargetScriptsListView.RegisterCallback<DragPerformEvent>(OnDrop);
+            if (targetScriptsListView == null) return;
+            targetScriptsListView.RegisterCallback<DragLeaveEvent>(OnDragLeave);
+            targetScriptsListView.RegisterCallback<DragUpdatedEvent>(OnDragUpdated);
+            targetScriptsListView.RegisterCallback<DragPerformEvent>(OnDrop);
         }
 
         private void UnregisterDragAndDropHandlers()
         {
-            if (TargetScriptsListView == null) return;
-            TargetScriptsListView.UnregisterCallback<DragLeaveEvent>(OnDragLeave);
-            TargetScriptsListView.UnregisterCallback<DragUpdatedEvent>(OnDragUpdated);
-            TargetScriptsListView.UnregisterCallback<DragPerformEvent>(OnDrop);
+            if (targetScriptsListView == null) return;
+            targetScriptsListView.UnregisterCallback<DragLeaveEvent>(OnDragLeave);
+            targetScriptsListView.UnregisterCallback<DragUpdatedEvent>(OnDragUpdated);
+            targetScriptsListView.UnregisterCallback<DragPerformEvent>(OnDrop);
         }
 
         private VisualElement MakeScriptFieldItem()
@@ -119,18 +125,18 @@ namespace BasementExperiments.ScriptIconColorizer
             }
 
             TargetScripts.AddRange(droppedMonoScripts);
-            TargetScriptsListView.Rebuild();
+            targetScriptsListView.Rebuild();
             DragAndDrop.AcceptDrag();
         }
 
-        public void Cleanup()
+        public override void Cleanup()
         {
             TargetScripts?.Clear();
             TargetScripts = null;
 
             UnregisterDragAndDropHandlers();
 
-            TargetScriptsListView = null;
+            targetScriptsListView = null;
         }
     }
 }

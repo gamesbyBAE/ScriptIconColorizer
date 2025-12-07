@@ -1,5 +1,4 @@
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,10 +8,12 @@ namespace BasementExperiments.ScriptIconColorizer
     {
         [SerializeField] private StyleSheet customStyleSheet;
 
-        private Image previewImage;
-        private ObjectField imagePickerField;
-        private ColorField colorSelectorField;
+        private PreviewImageView previewImageView;
+        private ImagePickerView imagePickerView;
+        private ColorPickerView colorPickerView;
         private TargetsListView targetsListView;
+        private ButtonView applyButtonView;
+        private ButtonView resetButtonView;
 
         private IconGenerator iconGenerator;
         private IconApplier iconApplier;
@@ -47,9 +48,14 @@ namespace BasementExperiments.ScriptIconColorizer
         private void CreateGUI()
         {
             iconGenerator ??= new IconGenerator();
+
             ApplyStyleSheet();
-            CreatePreviewArea();
-            CreateInteractableArea();
+
+            VisualElement previewArea = SetupPreviewArea();
+            VisualElement interactableArea = SetupInteractableArea();
+
+            rootVisualElement.Add(previewArea);
+            rootVisualElement.Add(interactableArea);
         }
 
         private void OnDestroy()
@@ -58,140 +64,108 @@ namespace BasementExperiments.ScriptIconColorizer
             iconSaver = null;
             iconApplier = null;
 
-            previewImage = null;
+            previewImageView?.Cleanup();
+            previewImageView = null;
 
-            imagePickerField?.UnregisterValueChangedCallback(ChangePreviewImage);
-            imagePickerField = null;
+            if (imagePickerView != null)
+            {
+                imagePickerView.OnImageChanged -= ChangePreviewImage;
+                imagePickerView.Cleanup();
+                imagePickerView = null;
+            }
 
-            colorSelectorField?.UnregisterValueChangedCallback(ChangePreviewImageTint);
-            colorSelectorField = null;
+            if (colorPickerView != null)
+            {
+                colorPickerView.OnColorChanged -= ChangePreviewImageTint;
+                colorPickerView?.Cleanup();
+                colorPickerView = null;
+            }
 
             targetsListView?.Cleanup();
             targetsListView = null;
 
-            Button applyButton = rootVisualElement.Query<Button>(applyButtonName);
-            if (applyButton != null) applyButton.clicked -= ApplyNewIcon;
+            if (applyButtonView != null)
+            {
+                applyButtonView.OnClick -= ApplyNewIcon;
+                applyButtonView?.Cleanup();
+                applyButtonView = null;
+            }
+
+            if (resetButtonView != null)
+            {
+                resetButtonView.OnClick -= ResetIcon;
+                resetButtonView?.Cleanup();
+                resetButtonView = null;
+            }
         }
 
         private void ApplyStyleSheet()
         {
             if (!customStyleSheet)
-                Debug.Log("Custom Style Sheet not assigned!");
+                Debug.LogWarning("Custom Style Sheet not assigned!");
             else
                 rootVisualElement.styleSheets.Add(customStyleSheet);
         }
 
-        private void CreatePreviewArea()
+        private VisualElement SetupPreviewArea()
         {
-            VisualElement previewArea = new() { name = previewAreaName };
-            previewArea.Add(PreviewImage());
-
-            rootVisualElement.Add(previewArea);
+            previewImageView ??= new PreviewImageView(ussClassName: previewAreaName);
+            return previewImageView.RootElement;
         }
 
-        private void CreateInteractableArea()
+        private VisualElement SetupInteractableArea()
         {
+            imagePickerView ??= new ImagePickerView(ussClassName: imagePickerName);
+            colorPickerView ??= new ColorPickerView(ussClassName: colorSelectorName);
+            targetsListView ??= new TargetsListView(ussClassName: scriptListAreaName);
+            applyButtonView ??= new ButtonView("Apply", ussClassName: applyButtonName);
+            resetButtonView ??= new ButtonView("Reset", ussClassName: resetButtonName);
+
+            imagePickerView.OnImageChanged += ChangePreviewImage;
+            colorPickerView.OnColorChanged += ChangePreviewImageTint;
+            applyButtonView.OnClick += ApplyNewIcon;
+            resetButtonView.OnClick += ResetIcon;
+
+            // Initialising Preview;
+            ChangePreviewImage(imagePickerView.SelectedTexture);
+
             VisualElement controlsArea = new() { name = interactableAreaName };
-            controlsArea.Add(ImagePicker());
-            controlsArea.Add(ColorSelector());
-            controlsArea.Add(CreateScriptListArea());
-            controlsArea.Add(ApplyButton());
-            controlsArea.Add(ResetButton());
-
-            rootVisualElement.Add(controlsArea);
+            controlsArea.Add(imagePickerView.RootElement);
+            controlsArea.Add(colorPickerView.RootElement);
+            controlsArea.Add(targetsListView.RootElement);
+            controlsArea.Add(applyButtonView.RootElement);
+            controlsArea.Add(resetButtonView.RootElement);
+            return controlsArea;
         }
 
-        private Image PreviewImage()
+        private void ChangePreviewImage(Texture2D newTexture)
         {
-            previewImage = new Image { scaleMode = ScaleMode.ScaleToFit };
-            return previewImage;
-        }
+            if (!newTexture)
+                newTexture = iconGenerator?.DefaultIcon;
 
-        private ObjectField ImagePicker()
-        {
-            imagePickerField = new ObjectField("Custom Icon")
+            if (previewImageView != null)
             {
-                name = imagePickerName,
-                objectType = typeof(Texture2D),
-                viewDataKey = "lastSelectedIcon" // Responsible for data persistence
-            };
+                previewImageView.UpdatePreviewTexture(newTexture);
+                previewImageView.UpdatePreviewTint(Color.white);
+            }
 
-            imagePickerField.RegisterValueChangedCallback(ChangePreviewImage);
-
-            return imagePickerField;
+            colorPickerView?.ResetPickerWithoutNotify(Color.white);
         }
 
-        private ColorField ColorSelector()
+        private void ChangePreviewImageTint(Color newColor)
         {
-            colorSelectorField = new ColorField("Icon Tint")
-            {
-                name = colorSelectorName,
-                value = new Color(1, 1, 1, 1),
-                viewDataKey = "lastSelectedColor", // Responsible for data persistence
-            };
-
-            colorSelectorField.RegisterValueChangedCallback(ChangePreviewImageTint);
-
-            return colorSelectorField;
-        }
-
-        private VisualElement CreateScriptListArea()
-        {
-            targetsListView = new TargetsListView();
-
-            VisualElement scriptListArea = new() { name = scriptListAreaName };
-            scriptListArea.Add(targetsListView.TargetScriptsListView);
-
-            return scriptListArea;
-        }
-
-        private Button ApplyButton()
-        {
-            Button applyButton = new(() => { ApplyNewIcon(); })
-            {
-                name = applyButtonName,
-                text = "APPLY"
-            };
-
-            return applyButton;
-        }
-
-        private Button ResetButton()
-        {
-            Button resetButton = new(() => { ResetIcon(); })
-            {
-                name = resetButtonName,
-                text = "Reset to Default"
-            };
-
-            return resetButton;
-        }
-
-        private void ChangePreviewImage(ChangeEvent<Object> evt)
-        {
-            RepaintImagePickerWithoutNotify();
-
-            if (evt.newValue != evt.previousValue)
-                ResetColorPickerWithoutNotify();
-
-            previewImage.sprite = iconGenerator.GetIconPreview(evt.newValue as Texture2D);
-        }
-
-        private void ChangePreviewImageTint(ChangeEvent<Color> evt)
-        {
-            previewImage.sprite = iconGenerator.GetIconPreview(evt.newValue);
+            previewImageView?.UpdatePreviewTint(newColor);
         }
 
         private void ApplyNewIcon()
         {
-            IconContext iconContext = new(
-                iconGenerator.NewIconType,
-                imagePickerField.value as Texture2D,
-                ColorUtility.ToHtmlStringRGBA(colorSelectorField.value),
-                iconGenerator.NewTintedTexture);
+            IconContext iconContext = iconGenerator.GenerateIconAndGetContext(
+                imagePickerView?.SelectedTexture,
+                colorPickerView?.SelectedColor ?? Color.white);
 
             iconSaver ??= new IconSaver();
             string iconPath = iconSaver.SaveIcon(iconContext);
+            Debug.LogFormat($"Icon saved at path: {iconPath}");
 
             iconApplier ??= new IconApplier();
             iconApplier.ChangeIcon(iconPath, targetsListView.TargetScripts);
@@ -201,37 +175,6 @@ namespace BasementExperiments.ScriptIconColorizer
         {
             iconApplier ??= new IconApplier();
             iconApplier.ResetIcon(targetsListView.TargetScripts);
-        }
-
-        /// <summary>
-        /// Repaints the ObjectField with the user selected texture
-        /// without triggering the value change event.
-        /// </summary>
-        private void RepaintImagePickerWithoutNotify()
-        {
-            /*
-                Necessary because domain reload visually shows 'None' selected
-                but clicking the field or the dot on the right shows it actually
-                has a value assigned to it.
-
-                Hence, refreshing/repainting the field to visually reflect the
-                selection for better UX.
-            */
-
-            if (!imagePickerField.value) return;
-
-            Object storedValue = imagePickerField.value;
-            imagePickerField.SetValueWithoutNotify(null); // Clearing to force the UI to refresh
-            imagePickerField.SetValueWithoutNotify(storedValue);
-        }
-
-        /// <summary>
-        /// Resets the ColorField to show White color without
-        /// triggering the Value Change Event.
-        /// </summary>
-        private void ResetColorPickerWithoutNotify()
-        {
-            colorSelectorField.SetValueWithoutNotify(Color.white);
         }
     }
 }

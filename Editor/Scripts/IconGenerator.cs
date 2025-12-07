@@ -5,55 +5,46 @@ namespace BasementExperiments.ScriptIconColorizer
 {
     public class IconGenerator
     {
-        public IconType NewIconType { get; private set; }
-        private Texture2D textureToModify;
-        public Texture2D NewTintedTexture { get; private set; }
-
         private readonly Texture2D defaultIcon;
-        private readonly Vector2 previewSpritePivot;
-        private readonly float previewSpritePixelPerUnit;
+        public Texture2D DefaultIcon => defaultIcon;
+
         private readonly string defaultIconName = "d_cs Script Icon";
 
         public IconGenerator()
         {
             defaultIcon = CopyTexture((Texture2D)EditorGUIUtility.IconContent(defaultIconName).image);
             if (!defaultIcon)
-                Debug.LogError("Default icon could not be loaded. Make sure you are using Unity Editor.");
-
-            previewSpritePivot = new Vector2(0.5f, 0.5f);
-            previewSpritePixelPerUnit = 100f;
+                Debug.LogError("Default 'MonoScript' icon could not be loaded.");
         }
 
-        public Sprite GetIconPreview(Texture2D selectedTexture)
+        public IconContext GenerateIconAndGetContext(Texture2D sourceTexture, Color tintColor)
         {
-            NewIconType = selectedTexture ? IconType.CUSTOM : IconType.DEFAULT;
+            IconType iconType = sourceTexture ? IconType.CUSTOM : IconType.DEFAULT;
+            iconType = Utils.GetIconTypeFromColor(iconType, tintColor);
 
-            textureToModify = NewIconType > IconType.DEFAULT_TINTED
-                ? CopyTexture(selectedTexture)
-                : defaultIcon;
+            bool needsTinting = Utils.NeedsTinting(iconType);
 
-            if (!textureToModify)
+            Texture2D iconTexture = defaultIcon;
+            string newTextureName = "default";
+
+            if (sourceTexture)
             {
-                Debug.LogError("Failed to copy the texture for preview or default icon not found.");
-                return null;
+                newTextureName = sourceTexture.name;
+                iconTexture = needsTinting ? CopyTexture(sourceTexture) : sourceTexture;
             }
 
-            return CreateNewSprite(textureToModify);
-        }
+            if (needsTinting)
+                iconTexture = TintTexture(iconTexture, tintColor);
 
-        public Sprite GetIconPreview(Color tintColor)
-        {
-            NewIconType = Utils.GetIconTypeFromColor(NewIconType, tintColor);
+            IconContext iconContext = new(
+                iconType,
+                tintColor,
+                iconTexture,
+                newTextureName);
 
-            NewTintedTexture = TintTexture(textureToModify, tintColor);
+            Debug.LogFormat($"IconContext: {iconType}, {tintColor}, {newTextureName}, {iconTexture == null}");
 
-            if (!NewTintedTexture)
-            {
-                Debug.LogError("Failed to tint the texture.");
-                return null;
-            }
-
-            return CreateNewSprite(NewTintedTexture);
+            return iconContext;
         }
 
         /// <summary>
@@ -65,8 +56,14 @@ namespace BasementExperiments.ScriptIconColorizer
         {
             try
             {
-                var tex = new Texture2D(textureToCopy.width, textureToCopy.height, textureToCopy.format, textureToCopy.mipmapCount > 1);
+                var tex = new Texture2D(
+                    textureToCopy.width,
+                    textureToCopy.height,
+                    textureToCopy.format,
+                    textureToCopy.mipmapCount > 1);
+
                 Graphics.CopyTexture(textureToCopy, tex);
+
                 return tex;
             }
             catch (System.Exception e)
@@ -75,26 +72,10 @@ namespace BasementExperiments.ScriptIconColorizer
             }
         }
 
-        /// <summary>
-        /// Generates sprite from a given Texture2D.
-        /// </summary>
-        /// <param name="sourceTexture">Texture to be used to create new sprite.</param>
-        /// <returns>Newly created sprite.</returns>
-        private Sprite CreateNewSprite(Texture2D sourceTexture)
-        {
-            if (!sourceTexture)
-            {
-                Debug.LogError("Source texture is null, cannot create sprite.");
-                return null;
-            }
-
-            Rect textureRect = new(0.0f, 0.0f, sourceTexture.width, sourceTexture.height);
-            return Sprite.Create(sourceTexture, textureRect, previewSpritePivot, previewSpritePixelPerUnit);
-        }
-
         private Texture2D TintTexture(Texture2D textureToTint, Color tintColor)
         {
-            if (!textureToTint || tintColor == Color.white) return textureToTint;
+            if (!textureToTint || tintColor == Color.white)
+                return textureToTint;
 
             Color32[] tintedPixels = textureToTint.GetPixels32();
             for (int i = 0; i < tintedPixels.Length; i++)
@@ -105,6 +86,7 @@ namespace BasementExperiments.ScriptIconColorizer
             tintedTex.SetPixels32(tintedPixels);
             tintedTex.Apply();
 
+            Debug.Log("Texture tinted successfully.");
             return tintedTex;
         }
     }
