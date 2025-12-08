@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 
-namespace BasementExperiments.ScriptIconColorizer
+namespace BasementExperiments.ScriptIconCustomiser
 {
     public class IconApplier
     {
@@ -15,8 +14,15 @@ namespace BasementExperiments.ScriptIconColorizer
                 return;
             }
 
-            Texture2D iconToApply = AssetDatabase.LoadAssetAtPath<Texture2D>(iconPath);
-            ApplyIcon(iconToApply, targetScripts);
+            try
+            {
+                Texture2D iconToApply = AssetDatabase.LoadAssetAtPath<Texture2D>(iconPath);
+                ApplyIcon(iconToApply, targetScripts);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Error during scripted asset import: {e.Message}");
+            }
         }
 
         public void ResetIcon()

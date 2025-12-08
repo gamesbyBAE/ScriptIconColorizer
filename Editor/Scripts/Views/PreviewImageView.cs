@@ -1,13 +1,13 @@
 using UnityEngine.UIElements;
 using UnityEngine;
 
-namespace BasementExperiments.ScriptIconColorizer
+namespace BasementExperiments.ScriptIconCustomiser
 {
     public class PreviewImageView : BaseView
     {
         private Image previewImage;
 
-        private readonly VisualElement rootElement;
+        private VisualElement rootElement;
         public override VisualElement RootElement => rootElement;
 
         public PreviewImageView(string ussClassName) : base(ussClassName)
@@ -37,8 +37,10 @@ namespace BasementExperiments.ScriptIconColorizer
 
         public override void Cleanup()
         {
-            if (previewImage == null) return;
             previewImage = null;
+
+            rootElement?.Clear();
+            rootElement = null;
         }
     }
 }

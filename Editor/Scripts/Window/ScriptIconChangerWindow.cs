@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace BasementExperiments.ScriptIconColorizer
+namespace BasementExperiments.ScriptIconCustomiser
 {
     public class ScriptIconChangerWindow : EditorWindow
     {
@@ -19,19 +20,9 @@ namespace BasementExperiments.ScriptIconColorizer
         private IconApplier iconApplier;
         private IconSaver iconSaver;
 
-        private readonly Vector2 windowSize = new(250, 700);
+        private List<BaseView> allViews;
 
-        // Names must match with the one mentioned in the
-        // USS to automatically apply custom styles.
-        #region  USS Names
-        private readonly string previewAreaName = "previewArea";
-        private readonly string interactableAreaName = "interactableArea";
-        private readonly string imagePickerName = "imagePicker";
-        private readonly string colorSelectorName = "colorSelector";
-        private readonly string scriptListAreaName = "scriptListArea";
-        private readonly string applyButtonName = "applyButton";
-        private readonly string resetButtonName = "resetButton";
-        #endregion
+        private readonly Vector2 windowSize = new(250, 700);
 
         public void ShowWindow()
         {
@@ -48,6 +39,7 @@ namespace BasementExperiments.ScriptIconColorizer
         private void CreateGUI()
         {
             iconGenerator ??= new IconGenerator();
+            allViews = new List<BaseView>();
 
             ApplyStyleSheet();
 
@@ -56,6 +48,19 @@ namespace BasementExperiments.ScriptIconColorizer
 
             rootVisualElement.Add(previewArea);
             rootVisualElement.Add(interactableArea);
+
+            // Initialsing Preview Image
+            ChangePreviewImage(imagePickerView.SelectedTexture);
+
+            RegisterViews(new BaseView[]
+                {
+                    previewImageView,
+                    imagePickerView,
+                    colorPickerView,
+                    targetsListView,
+                    applyButtonView,
+                    resetButtonView
+                });
         }
 
         private void OnDestroy()
@@ -64,39 +69,28 @@ namespace BasementExperiments.ScriptIconColorizer
             iconSaver = null;
             iconApplier = null;
 
-            previewImageView?.Cleanup();
-            previewImageView = null;
-
+            // Unsubscribing
             if (imagePickerView != null)
-            {
                 imagePickerView.OnImageChanged -= ChangePreviewImage;
-                imagePickerView.Cleanup();
-                imagePickerView = null;
-            }
 
             if (colorPickerView != null)
-            {
                 colorPickerView.OnColorChanged -= ChangePreviewImageTint;
-                colorPickerView?.Cleanup();
-                colorPickerView = null;
-            }
-
-            targetsListView?.Cleanup();
-            targetsListView = null;
 
             if (applyButtonView != null)
-            {
                 applyButtonView.OnClick -= ApplyNewIcon;
-                applyButtonView?.Cleanup();
-                applyButtonView = null;
-            }
 
             if (resetButtonView != null)
-            {
                 resetButtonView.OnClick -= ResetIcon;
-                resetButtonView?.Cleanup();
-                resetButtonView = null;
-            }
+
+            // Calling CleanUp() of all the views.
+            if (allViews == null)
+                return;
+
+            for (int i = 0; i < allViews.Count; i++)
+                allViews[i]?.Cleanup();
+
+            allViews.Clear();
+            allViews = null;
         }
 
         private void ApplyStyleSheet()
@@ -107,29 +101,34 @@ namespace BasementExperiments.ScriptIconColorizer
                 rootVisualElement.styleSheets.Add(customStyleSheet);
         }
 
+        private void RegisterViews(params BaseView[] views)
+        {
+            allViews ??= new List<BaseView>();
+            foreach (var v in views)
+                if (v != null && !allViews.Contains(v))
+                    allViews.Add(v);
+        }
+
         private VisualElement SetupPreviewArea()
         {
-            previewImageView ??= new PreviewImageView(ussClassName: previewAreaName);
+            previewImageView ??= new PreviewImageView(ussClassName: UssNames.PreviewArea);
             return previewImageView.RootElement;
         }
 
         private VisualElement SetupInteractableArea()
         {
-            imagePickerView ??= new ImagePickerView(ussClassName: imagePickerName);
-            colorPickerView ??= new ColorPickerView(ussClassName: colorSelectorName);
-            targetsListView ??= new TargetsListView(ussClassName: scriptListAreaName);
-            applyButtonView ??= new ButtonView("Apply", ussClassName: applyButtonName);
-            resetButtonView ??= new ButtonView("Reset", ussClassName: resetButtonName);
+            imagePickerView ??= new ImagePickerView(ussClassName: UssNames.ImagePicker);
+            colorPickerView ??= new ColorPickerView(ussClassName: UssNames.ColorSelector);
+            targetsListView ??= new TargetsListView(ussClassName: UssNames.ScriptListArea);
+            applyButtonView ??= new ButtonView("Apply", ussClassName: UssNames.ApplyButton);
+            resetButtonView ??= new ButtonView("Reset", ussClassName: UssNames.ResetButton);
 
             imagePickerView.OnImageChanged += ChangePreviewImage;
             colorPickerView.OnColorChanged += ChangePreviewImageTint;
             applyButtonView.OnClick += ApplyNewIcon;
             resetButtonView.OnClick += ResetIcon;
 
-            // Initialising Preview;
-            ChangePreviewImage(imagePickerView.SelectedTexture);
-
-            VisualElement controlsArea = new() { name = interactableAreaName };
+            VisualElement controlsArea = new() { name = UssNames.InteractableArea };
             controlsArea.Add(imagePickerView.RootElement);
             controlsArea.Add(colorPickerView.RootElement);
             controlsArea.Add(targetsListView.RootElement);
@@ -165,7 +164,6 @@ namespace BasementExperiments.ScriptIconColorizer
 
             iconSaver ??= new IconSaver();
             string iconPath = iconSaver.SaveIcon(iconContext);
-            Debug.LogFormat($"Icon saved at path: {iconPath}");
 
             iconApplier ??= new IconApplier();
             iconApplier.ChangeIcon(iconPath, targetsListView.TargetScripts);

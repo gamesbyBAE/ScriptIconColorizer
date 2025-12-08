@@ -5,7 +5,7 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace BasementExperiments.ScriptIconColorizer
+namespace BasementExperiments.ScriptIconCustomiser
 {
     public class TargetsListView : BaseView
     {

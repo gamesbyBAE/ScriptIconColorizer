@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace BasementExperiments.ScriptIconColorizer
+namespace BasementExperiments.ScriptIconCustomiser
 {
     public enum IconType { DEFAULT, DEFAULT_TINTED, CUSTOM, CUSTOM_TINTED }
 

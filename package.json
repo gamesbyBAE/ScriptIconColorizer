@@ -1,17 +1,24 @@
 {
-  "name": "com.basementexperiments.scripticoncolorizer",
-  "version": "0.0.3",
-  "displayName": "Script Icon Colorizer",
-  "description": "Editor util to customise scripts icon color.",
+  "name": "com.basement-experiments.script-icon-customiser",
+  "version": "0.1.0",
+  "displayName": "Script Icon Customiser",
+  "description": "Editor util to customise Script icon and/or it's color.",
   "unity": "2021.3",
   "keywords": [
+    "script",
+    "icon",
+    "customise",
+    "color",
+    "monoscript",
+    "free",
+    "changer",
     "utility",
-    "scripts",
-    "icon"
+    "editor"
   ],
   "author": {
-    "name": "Mayank 'DerperDoing' Bagchi",
+    "name": "Basement Experiments",
     "email": "basementexperiments@hotmail.com",
-    "url": "https://youtube.com/@BasementExperiments"
-  }
+    "url": "https://www.mayankbagchi.dev"
+  },
+  "license": "MIT"
 }

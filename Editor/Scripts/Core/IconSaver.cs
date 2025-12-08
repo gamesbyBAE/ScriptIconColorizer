@@ -1,46 +1,65 @@
 using System.IO;
-using UnityEditor;
+using System.Reflection;
 using UnityEngine;
+using UnityEditor.PackageManager;
 
-namespace BasementExperiments.ScriptIconColorizer
+namespace BasementExperiments.ScriptIconCustomiser
 {
     public class IconSaver
     {
-        private readonly string iconsDirName = "Packages/com.basementexperiments.scripticoncolorizer/Icons";
-        private readonly string iconCustomName = "d3rp_<textureName>_<color>";
+        private readonly string iconsDirName;
+        private readonly string iconFileName = "d3rp_<textureName>_<color>";
 
+        public IconSaver()
+        {
+            Assembly editorAssembly = Assembly.GetExecutingAssembly();
+            var packageInfo = PackageInfo.FindForAssembly(editorAssembly);
+
+            if (packageInfo != null)
+            {
+                iconsDirName = Path.Combine("Packages", packageInfo.name, "Icons");
+            }
+            else
+            {
+                Debug.LogError("Could not find package path. Is this script inside a UPM package?");
+            }
+        }
         public string SaveIcon(IconContext iconContext)
         {
             switch (iconContext.IconType)
             {
                 case IconType.CUSTOM:
-                    return GetVirginAssetPath(iconContext.IconTexture);
+                    return GetUserAssetPath(iconContext.IconTexture);
 
                 case IconType.DEFAULT_TINTED:
                 case IconType.CUSTOM_TINTED:
-                    string iconName = GetIconName(iconContext.TextureName, iconContext.TintColor);
-                    Debug.LogFormat($"Saving tinted icon as: {iconName}");
-                    return SaveTextureToDisk(iconContext.IconTexture, iconName);
+                    {
+                        string iconName = GetIconName(
+                            iconContext.TextureName,
+                            iconContext.TintColor);
+
+                        return SaveTextureToDisk(iconContext.IconTexture, iconName);
+                    }
 
                 default:
                     return null;
             }
         }
 
-        private string GetVirginAssetPath(Texture2D texture)
+        private string GetUserAssetPath(Texture2D texture)
         {
             if (!texture) return null;
-            return AssetDatabase.GetAssetPath(texture);
+            return UnityEditor.AssetDatabase.GetAssetPath(texture);
         }
 
         private string GetIconName(string textureName, Color color)
         {
             if (string.IsNullOrEmpty(textureName))
-                textureName = "default";
+                textureName = "unknown";
 
             string colorHTMLString = ColorUtility.ToHtmlStringRGBA(color);
 
-            return iconCustomName
+            return iconFileName
                 .Replace("<textureName>", textureName)
                 .Replace("<color>", colorHTMLString);
         }
@@ -56,12 +75,11 @@ namespace BasementExperiments.ScriptIconColorizer
             Directory.CreateDirectory(iconsDirName);
 
             string filePath = Path.Combine(iconsDirName, $"{fileName}.{fileExtension}");
-            Debug.LogFormat($"Saving icon to path: {filePath}");
 
             if (!File.Exists(filePath))
             {
                 File.WriteAllBytes(filePath, textureToSave.EncodeToPNG());
-                AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+                UnityEditor.AssetDatabase.Refresh();
             }
 
             return filePath;

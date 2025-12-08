@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace BasementExperiments.ScriptIconColorizer
+namespace BasementExperiments.ScriptIconCustomiser
 {
     public class IconGenerator
     {
@@ -25,30 +25,32 @@ namespace BasementExperiments.ScriptIconColorizer
             bool needsTinting = Utils.NeedsTinting(iconType);
 
             Texture2D iconTexture = defaultIcon;
-            string newTextureName = "default";
+            string textureName = "default";
 
             if (sourceTexture)
             {
-                newTextureName = sourceTexture.name;
                 iconTexture = needsTinting ? CopyTexture(sourceTexture) : sourceTexture;
+                textureName = sourceTexture.name;
             }
 
             if (needsTinting)
+            {
                 iconTexture = TintTexture(iconTexture, tintColor);
+            }
 
             IconContext iconContext = new(
                 iconType,
                 tintColor,
                 iconTexture,
-                newTextureName);
-
-            Debug.LogFormat($"IconContext: {iconType}, {tintColor}, {newTextureName}, {iconTexture == null}");
+                textureName);
 
             return iconContext;
         }
 
         /// <summary>
-        /// Copies pixel data from one texture to another.
+        /// Clones the sauce Texture2D.
+        /// Necessary to avoid modifying the original texture when applying tints, moreover,
+        /// permissions to write to the original texture may not be available.
         /// </summary>
         /// <param name="textureToCopy">Texture2D to be copied.</param>
         /// <returns>Texture2D created by copying pixels.</returns>
@@ -72,6 +74,12 @@ namespace BasementExperiments.ScriptIconColorizer
             }
         }
 
+        /// <summary>
+        /// Multiplies each pixel of the texture by the tint color.
+        /// </summary>
+        /// <param name="textureToTint">Texture2D to be used as the sauce for modification.</param>
+        /// <param name="tintColor">Color to be applied to each pixel.</param>
+        /// <returns>A copy of source Texture2D that is tinted.</returns>
         private Texture2D TintTexture(Texture2D textureToTint, Color tintColor)
         {
             if (!textureToTint || tintColor == Color.white)
@@ -86,7 +94,6 @@ namespace BasementExperiments.ScriptIconColorizer
             tintedTex.SetPixels32(tintedPixels);
             tintedTex.Apply();
 
-            Debug.Log("Texture tinted successfully.");
             return tintedTex;
         }
     }

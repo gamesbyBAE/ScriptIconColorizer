@@ -1,8 +1,8 @@
 using UnityEditor;
 
-namespace BasementExperiments.ScriptIconColorizer
+namespace BasementExperiments.ScriptIconCustomiser
 {
-    public class ScriptIconChanger : Editor
+    public class ScriptIconCustomiser : Editor
     {
         [MenuItem("Assets/Script Icon/Change Icon %&#c", false, 10000)]
         private static void ChangeIcon()

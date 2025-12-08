@@ -1,6 +1,6 @@
 using UnityEngine.UIElements;
 
-namespace BasementExperiments.ScriptIconColorizer
+namespace BasementExperiments.ScriptIconCustomiser
 {
     public abstract class BaseView
     {
