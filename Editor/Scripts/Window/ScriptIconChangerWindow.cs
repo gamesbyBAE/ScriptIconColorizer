@@ -43,11 +43,19 @@ namespace BasementExperiments.ScriptIconCustomiser
 
             ApplyStyleSheet();
 
+            CreateViews();
+
+            // TODO: One single layout method that further calls sub-layout methods.
             VisualElement previewArea = SetupPreviewArea();
-            VisualElement interactableArea = SetupInteractableArea();
+            VisualElement interactableArea = BuildLayout();
 
             rootVisualElement.Add(previewArea);
             rootVisualElement.Add(interactableArea);
+
+            // Branding Footer
+            Label footerLabel = new("--Basement Experiments--");
+            rootVisualElement.Add(footerLabel);
+
 
             // Initialsing Preview Image
             ChangePreviewImage(imagePickerView.SelectedTexture);
@@ -115,13 +123,27 @@ namespace BasementExperiments.ScriptIconCustomiser
             return previewImageView.RootElement;
         }
 
-        private VisualElement SetupInteractableArea()
+        private void CreateViews()
         {
             imagePickerView ??= new ImagePickerView(ussClassName: UssNames.ImagePicker);
             colorPickerView ??= new ColorPickerView(ussClassName: UssNames.ColorSelector);
             targetsListView ??= new TargetsListView(ussClassName: UssNames.ScriptListArea);
-            applyButtonView ??= new ButtonView("Apply", ussClassName: UssNames.ApplyButton);
-            resetButtonView ??= new ButtonView("Reset", ussClassName: UssNames.ResetButton);
+            applyButtonView ??= new ButtonView("APPLY", ussClassName: UssNames.ApplyButton);
+            resetButtonView ??= new ButtonView("RESTORE", ussClassName: UssNames.ResetButton);
+
+            imagePickerView.OnImageChanged += ChangePreviewImage;
+            colorPickerView.OnColorChanged += ChangePreviewImageTint;
+            applyButtonView.OnClick += ApplyNewIcon;
+            resetButtonView.OnClick += ResetIcon;
+        }
+
+        private VisualElement BuildLayout()
+        {
+            imagePickerView ??= new ImagePickerView(ussClassName: UssNames.ImagePicker);
+            colorPickerView ??= new ColorPickerView(ussClassName: UssNames.ColorSelector);
+            targetsListView ??= new TargetsListView(ussClassName: UssNames.ScriptListArea);
+            applyButtonView ??= new ButtonView("APPLY", ussClassName: UssNames.ApplyButton);
+            resetButtonView ??= new ButtonView("RESTORE", ussClassName: UssNames.ResetButton);
 
             imagePickerView.OnImageChanged += ChangePreviewImage;
             colorPickerView.OnColorChanged += ChangePreviewImageTint;
@@ -129,13 +151,24 @@ namespace BasementExperiments.ScriptIconCustomiser
             resetButtonView.OnClick += ResetIcon;
 
             VisualElement controlsArea = new() { name = UssNames.InteractableArea };
-            controlsArea.Add(imagePickerView.RootElement);
-            controlsArea.Add(colorPickerView.RootElement);
+
+            // Create a horizontal row for image & color pickers
+            VisualElement pickerRow = new() { name = "pickerRow" };
+            pickerRow.Add(imagePickerView.RootElement);
+            pickerRow.Add(colorPickerView.RootElement);
+
+            controlsArea.Add(pickerRow);
             controlsArea.Add(targetsListView.RootElement);
-            controlsArea.Add(applyButtonView.RootElement);
-            controlsArea.Add(resetButtonView.RootElement);
+
+            // Create a horizontal row for action buttons
+            VisualElement actionRow = new() { name = "actionButtonsRow" };
+            actionRow.Add(resetButtonView.RootElement);
+            actionRow.Add(applyButtonView.RootElement);
+
+            controlsArea.Add(actionRow);
             return controlsArea;
         }
+
 
         private void ChangePreviewImage(Texture2D newTexture)
         {

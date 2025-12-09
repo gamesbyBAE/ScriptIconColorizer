@@ -17,7 +17,7 @@ namespace BasementExperiments.ScriptIconCustomiser
 
         public ColorPickerView(string ussClassName) : base(ussClassName)
         {
-            colorPickerField = new ColorField("Icon Tint")
+            colorPickerField = new ColorField()
             {
                 name = ussClassName,
                 value = Color.white,
