@@ -9,5 +9,6 @@ namespace BasementExperiments.ScriptIconCustomiser
         public const string ScriptListArea = "scriptListArea";
         public const string ApplyButton = "applyButton";
         public const string ResetButton = "resetButton";
+        public const string Footer = "footer";
     }
 }

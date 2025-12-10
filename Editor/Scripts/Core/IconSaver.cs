@@ -21,7 +21,7 @@ namespace BasementExperiments.ScriptIconCustomiser
             }
             else
             {
-                Debug.LogError("Could not find package path. Is this script inside a UPM package?");
+                Debug.LogError("[FAIL]: Couldn't find the package path. Is this script inside a UPM package?");
             }
         }
         public string SaveIcon(IconContext iconContext)

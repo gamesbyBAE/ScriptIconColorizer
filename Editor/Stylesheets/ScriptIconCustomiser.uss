@@ -1,4 +1,3 @@
-/* Preview area: simple styling without box-shadow or gradients */
 #previewArea {
     background-color: #6f6f6f;
     justify-content: center;
@@ -6,6 +5,7 @@
     max-width: 250px;
     height: 100%;
     margin: 5px 5px;
+    margin-bottom: 0px;
     border-radius: 10px;
     border-width: 1px;
     border-color: #332f2e;
@@ -36,7 +36,7 @@
     border-color: #555555;
 }
 
-/* Compact square picker containers */
+/* Common properties for image and color pickers*/
 #imagePicker,
 #colorSelector {
     height: 40px;
@@ -50,30 +50,32 @@
     align-items: center;
 }
 
-#imagePicker {
-    width: 10px;
-    flex-grow: 5;
-}
-
-#colorSelector {
-    width: 50px;
-    flex-grow: 1;
-}
-
-/* Make object field input compact inside picker */
 #imagePicker .unity-object-field__input,
 #colorSelector .unity-color-field__input {
     width: 100%;
     height: 100%;
     padding: 0px 1px;
     border-width: 0;
+    border-radius: 5px;
 }
 
+#imagePicker {
+    width: 10px;
+    flex-grow: 5;
+}
+
+#colorSelector {
+    width: 30px;
+    flex-grow: 1;
+}
+
+/* Hiding image icon in image picker */
 #imagePicker .unity-object-field-display__icon {
     max-width: 0;
     max-height: 0;
 }
 
+/* Increasing the asset label text */
 #imagePicker .unity-object-field-display__label {
     font-size: 13px;
     -unity-font-style: bold;
@@ -83,20 +85,13 @@
 
 /* Script list area spacing */
 #scriptListArea {
-    margin: 10px 8px;
-}
-
-/* List view */
-#scriptListView {
-    margin: 10px;
-    max-height: 180px;
-    flex-direction: column;
-    margin: 5px 10px;
+    margin: 12px 2px 0px; /* top right+left bottom */
     background-color: #2f2f2f;
+    height: 300px;
+    max-height: 300px;
+    padding: 5px;
     border-radius: 8px;
-    padding: 10px;
     border-width: 1px;
-    border-color: #444444;
 }
 
 /* Action buttons row: horizontal layout */
@@ -104,7 +99,7 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    margin-top: 12px;
+    margin: 12px 0px 12px;
     padding: 0 10px;
 }
 
@@ -115,18 +110,29 @@
     min-width: 80px;
     flex-grow: 1;
     -unity-font-style: bold;
-    font-size: 14px;
+    font-size: 13px;
     color: white;
     border-radius: 6px;
     border-width: 1px;
-    border-color: #000000;
 }
 
 /* Button colors */
 #applyButton {
-    background-color: #2ea44f;
+    background-color: #3FAF6C;
+}
+
+#applyButton:hover {
+    background-color: #55C883;
 }
 
 #resetButton {
-    background-color: #b24b55;
+    background-color: #B44A4A;
 }
+#resetButton:hover {
+    background-color: #CC5E5E;
+}
+
+#footer {
+    opacity: 0.2;
+    -unity-text-align: middle-center;
+    font-size: 11px;

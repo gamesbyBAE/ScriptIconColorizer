@@ -53,7 +53,11 @@ namespace BasementExperiments.ScriptIconCustomiser
             rootVisualElement.Add(interactableArea);
 
             // Branding Footer
-            Label footerLabel = new("--Basement Experiments--");
+            Label footerLabel = new()
+            {
+                name = UssNames.Footer,
+                text = "› Basement Experiments ‹"
+            };
             rootVisualElement.Add(footerLabel);
 
 
@@ -139,33 +143,22 @@ namespace BasementExperiments.ScriptIconCustomiser
 
         private VisualElement BuildLayout()
         {
-            imagePickerView ??= new ImagePickerView(ussClassName: UssNames.ImagePicker);
-            colorPickerView ??= new ColorPickerView(ussClassName: UssNames.ColorSelector);
-            targetsListView ??= new TargetsListView(ussClassName: UssNames.ScriptListArea);
-            applyButtonView ??= new ButtonView("APPLY", ussClassName: UssNames.ApplyButton);
-            resetButtonView ??= new ButtonView("RESTORE", ussClassName: UssNames.ResetButton);
-
-            imagePickerView.OnImageChanged += ChangePreviewImage;
-            colorPickerView.OnColorChanged += ChangePreviewImageTint;
-            applyButtonView.OnClick += ApplyNewIcon;
-            resetButtonView.OnClick += ResetIcon;
-
             VisualElement controlsArea = new() { name = UssNames.InteractableArea };
 
             // Create a horizontal row for image & color pickers
             VisualElement pickerRow = new() { name = "pickerRow" };
             pickerRow.Add(imagePickerView.RootElement);
             pickerRow.Add(colorPickerView.RootElement);
-
             controlsArea.Add(pickerRow);
+
             controlsArea.Add(targetsListView.RootElement);
 
             // Create a horizontal row for action buttons
             VisualElement actionRow = new() { name = "actionButtonsRow" };
             actionRow.Add(resetButtonView.RootElement);
             actionRow.Add(applyButtonView.RootElement);
-
             controlsArea.Add(actionRow);
+
             return controlsArea;
         }
 
@@ -194,6 +187,13 @@ namespace BasementExperiments.ScriptIconCustomiser
             IconContext iconContext = iconGenerator.GenerateIconAndGetContext(
                 imagePickerView?.SelectedTexture,
                 colorPickerView?.SelectedColor ?? Color.white);
+
+            // Skip if trying to apply the default icon (no changes).
+            if (iconContext.IconType == IconType.DEFAULT
+                && iconContext.TintColor == Color.white)
+            {
+                return;
+            }
 
             iconSaver ??= new IconSaver();
             string iconPath = iconSaver.SaveIcon(iconContext);

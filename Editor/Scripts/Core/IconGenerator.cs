@@ -14,7 +14,7 @@ namespace BasementExperiments.ScriptIconCustomiser
         {
             defaultIcon = CopyTexture((Texture2D)EditorGUIUtility.IconContent(defaultIconName).image);
             if (!defaultIcon)
-                Debug.LogError("Default 'MonoScript' icon could not be loaded.");
+                Debug.LogError("[FAIL]: Default 'MonoScript' icon could not be loaded.");
         }
 
         public IconContext GenerateIconAndGetContext(Texture2D sourceTexture, Color tintColor)

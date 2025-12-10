@@ -10,7 +10,7 @@ namespace BasementExperiments.ScriptIconCustomiser
         {
             if (string.IsNullOrEmpty(iconPath))
             {
-                Debug.LogError("Icon Change Failed: Icon path is null!");
+                Debug.LogError("[FAIL]: Applying default icon or custom icon path is null!");
                 return;
             }
 
@@ -21,7 +21,7 @@ namespace BasementExperiments.ScriptIconCustomiser
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"Error during scripted asset import: {e.Message}");
+                Debug.LogError($"[FAIL]: Error during scripted asset import: {e.Message}");
             }
         }
 
@@ -38,22 +38,20 @@ namespace BasementExperiments.ScriptIconCustomiser
         private void ApplyIcon(Texture2D iconToApply, List<Object> targetScripts)
         {
             if (targetScripts == null || targetScripts.Count == 0)
-            {
-                Debug.LogError("Icon Change Failed: No 'MonoScript' assets selected!");
                 return;
-            }
 
             // Batching reimports so that they are executed only at the end.
             try
             {
                 AssetDatabase.StartAssetEditing();
+
                 for (int i = 0; i < targetScripts.Count; i++)
                     if (targetScripts[i])
                         SetScriptIcon(targetScripts[i], iconToApply);
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"Error during scripted asset import: {e.Message}");
+                Debug.LogError($"[FAIL]: Error during scripted asset import: {e.Message}");
             }
             finally
             {
