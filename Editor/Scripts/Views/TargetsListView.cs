@@ -12,17 +12,12 @@ namespace BasementExperiments.ScriptIconCustomiser
         private ListView targetScriptsListView;
         public List<Object> TargetScripts { get; private set; }
 
-        private readonly VisualElement rootElement;
+        private VisualElement rootElement;
         public override VisualElement RootElement => rootElement;
 
-        public TargetsListView(string ussClassName) : base(ussClassName)
+        public TargetsListView(string ussClassName, TargetScriptsPersistence targetsPersistence) : base(ussClassName)
         {
-            var selectedScripts = Utils.GetSelectedScripts();
-            if (selectedScripts != null)
-                TargetScripts = new List<Object>(selectedScripts);
-            else
-                TargetScripts = new List<Object>();
-
+            TargetScripts = InitialiseList(targetsPersistence);
 
             targetScriptsListView = new ListView(
                 itemsSource: TargetScripts,
@@ -41,6 +36,7 @@ namespace BasementExperiments.ScriptIconCustomiser
                 selectionType = SelectionType.Multiple,
                 virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight,
                 horizontalScrollingEnabled = false,
+                viewDataKey = "targetScriptsList" // Responsible for data persistence
             };
 
             rootElement = new VisualElement() { name = ussClassName };
@@ -49,20 +45,32 @@ namespace BasementExperiments.ScriptIconCustomiser
             RegisterDragAndDropHandlers();
         }
 
+        private List<Object> InitialiseList(TargetScriptsPersistence targetsPersistence)
+        {
+            List<Object> savedScripts = targetsPersistence.LoadScriptsFromPrefs();
+            if (savedScripts.Count > 0)
+                return savedScripts;
+
+            List<Object> selectedScripts = Utils.GetSelectedScripts();
+            return selectedScripts ?? new List<Object>();
+        }
+
         private void RegisterDragAndDropHandlers()
         {
-            if (targetScriptsListView == null) return;
-            targetScriptsListView.RegisterCallback<DragLeaveEvent>(OnDragLeave);
-            targetScriptsListView.RegisterCallback<DragUpdatedEvent>(OnDragUpdated);
-            targetScriptsListView.RegisterCallback<DragPerformEvent>(OnDrop);
+            if (rootElement == null) return;
+
+            rootElement.RegisterCallback<DragLeaveEvent>(OnDragLeave);
+            rootElement.RegisterCallback<DragUpdatedEvent>(OnDragUpdated);
+            rootElement.RegisterCallback<DragPerformEvent>(OnDrop);
         }
 
         private void UnregisterDragAndDropHandlers()
         {
-            if (targetScriptsListView == null) return;
-            targetScriptsListView.UnregisterCallback<DragLeaveEvent>(OnDragLeave);
-            targetScriptsListView.UnregisterCallback<DragUpdatedEvent>(OnDragUpdated);
-            targetScriptsListView.UnregisterCallback<DragPerformEvent>(OnDrop);
+            if (rootElement == null) return;
+
+            rootElement.UnregisterCallback<DragLeaveEvent>(OnDragLeave);
+            rootElement.UnregisterCallback<DragUpdatedEvent>(OnDragUpdated);
+            rootElement.UnregisterCallback<DragPerformEvent>(OnDrop);
         }
 
         private VisualElement MakeScriptFieldItem()
@@ -100,8 +108,8 @@ namespace BasementExperiments.ScriptIconCustomiser
 
         private void OnDragUpdated(DragUpdatedEvent evt)
         {
-            if (DragAndDrop.objectReferences.Length > 0 &&
-                DragAndDrop.objectReferences.Any(obj => obj is MonoScript))
+            if (DragAndDrop.objectReferences.Length > 0
+                && DragAndDrop.objectReferences.Any(obj => obj is MonoScript))
             {
                 DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
                 return;
@@ -120,7 +128,7 @@ namespace BasementExperiments.ScriptIconCustomiser
             var droppedMonoScripts = DragAndDrop.objectReferences.OfType<MonoScript>().ToList();
             if (droppedMonoScripts == null || droppedMonoScripts.Count <= 0)
             {
-                Debug.LogWarning("No 'MonoScript' assets were dropped.");
+                Debug.LogWarning("[WARNING]: No 'MonoScript' assets were dropped.");
                 return;
             }
 
@@ -137,6 +145,7 @@ namespace BasementExperiments.ScriptIconCustomiser
             UnregisterDragAndDropHandlers();
 
             targetScriptsListView = null;
+            rootElement = null;
         }
     }
 }

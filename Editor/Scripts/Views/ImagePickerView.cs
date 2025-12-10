@@ -21,6 +21,7 @@ namespace BasementExperiments.ScriptIconCustomiser
             {
                 name = ussClassName,
                 objectType = typeof(Texture2D),
+                tooltip = "Pick a custom icon image.",
                 viewDataKey = "lastSelectedIcon" // Responsible for data persistence
             };
 

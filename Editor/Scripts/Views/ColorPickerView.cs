@@ -22,6 +22,7 @@ namespace BasementExperiments.ScriptIconCustomiser
                 name = ussClassName,
                 value = Color.white,
                 showAlpha = true,
+                tooltip = "Pick a tint color.",
                 viewDataKey = "lastSelectedColor" // Responsible for data persistence
             };
 

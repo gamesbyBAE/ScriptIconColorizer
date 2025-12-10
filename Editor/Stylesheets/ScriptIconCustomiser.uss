@@ -136,3 +136,4 @@
     opacity: 0.2;
     -unity-text-align: middle-center;
     font-size: 11px;
+}

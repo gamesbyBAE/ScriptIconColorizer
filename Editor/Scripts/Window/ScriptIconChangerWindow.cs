@@ -19,6 +19,7 @@ namespace BasementExperiments.ScriptIconCustomiser
         private IconGenerator iconGenerator;
         private IconApplier iconApplier;
         private IconSaver iconSaver;
+        private TargetScriptsPersistence targetsPersistence;
 
         private List<BaseView> allViews;
 
@@ -39,7 +40,8 @@ namespace BasementExperiments.ScriptIconCustomiser
         private void CreateGUI()
         {
             iconGenerator ??= new IconGenerator();
-            allViews = new List<BaseView>();
+            targetsPersistence ??= new TargetScriptsPersistence();
+            allViews ??= new List<BaseView>();
 
             ApplyStyleSheet();
 
@@ -81,6 +83,9 @@ namespace BasementExperiments.ScriptIconCustomiser
             iconSaver = null;
             iconApplier = null;
 
+            targetsPersistence?.DeleteSavedGuids();
+            targetsPersistence = null;
+
             // Unsubscribing
             if (imagePickerView != null)
                 imagePickerView.OnImageChanged -= ChangePreviewImage;
@@ -108,7 +113,7 @@ namespace BasementExperiments.ScriptIconCustomiser
         private void ApplyStyleSheet()
         {
             if (!customStyleSheet)
-                Debug.LogWarning("Custom Style Sheet not assigned!");
+                Debug.LogWarning("[WARNING]: Custom Style Sheet not assigned!");
             else
                 rootVisualElement.styleSheets.Add(customStyleSheet);
         }
@@ -131,7 +136,7 @@ namespace BasementExperiments.ScriptIconCustomiser
         {
             imagePickerView ??= new ImagePickerView(ussClassName: UssNames.ImagePicker);
             colorPickerView ??= new ColorPickerView(ussClassName: UssNames.ColorSelector);
-            targetsListView ??= new TargetsListView(ussClassName: UssNames.ScriptListArea);
+            targetsListView ??= new TargetsListView(ussClassName: UssNames.ScriptListArea, targetsPersistence);
             applyButtonView ??= new ButtonView("APPLY", ussClassName: UssNames.ApplyButton);
             resetButtonView ??= new ButtonView("RESTORE", ussClassName: UssNames.ResetButton);
 
@@ -184,6 +189,8 @@ namespace BasementExperiments.ScriptIconCustomiser
 
         private void ApplyNewIcon()
         {
+            targetsPersistence.SaveGuidsToPrefs(targetsListView.TargetScripts);
+
             IconContext iconContext = iconGenerator.GenerateIconAndGetContext(
                 imagePickerView?.SelectedTexture,
                 colorPickerView?.SelectedColor ?? Color.white);
@@ -204,6 +211,8 @@ namespace BasementExperiments.ScriptIconCustomiser
 
         private void ResetIcon()
         {
+            targetsPersistence.SaveGuidsToPrefs(targetsListView.TargetScripts);
+
             iconApplier ??= new IconApplier();
             iconApplier.ResetIcon(targetsListView.TargetScripts);
         }
