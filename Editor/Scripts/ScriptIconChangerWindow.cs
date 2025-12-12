@@ -27,7 +27,7 @@ namespace BasementExperiments.ScriptIconCustomiser
         /// <summary>
         /// Quick action to reset the icon of selected scripts to default without opening the window.
         /// </summary>
-        [MenuItem("Assets/Script Icon/Reset %&#r", false, 10001)]
+        [MenuItem("Assets/Script Icon/Restore Icon %&#r", false, 10001)]
         private static void ResetIcon()
         {
             new IconApplier().ResetIcon();

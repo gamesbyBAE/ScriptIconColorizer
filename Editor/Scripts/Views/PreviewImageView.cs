@@ -19,8 +19,15 @@ namespace BasementExperiments.ScriptIconCustomiser
                 pickingMode = PickingMode.Ignore
             };
 
+            Label label = new()
+            {
+                name = "previewImageLabel",
+                text = "Preview"
+            };
+
             rootElement = new VisualElement() { name = ussClassName };
             rootElement.Add(previewImage);
+            rootElement.Add(label);
         }
 
         public void UpdatePreviewTexture(Texture2D previewTexture)

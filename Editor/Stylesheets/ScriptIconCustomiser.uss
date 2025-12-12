@@ -9,6 +9,17 @@
     border-radius: 10px;
     border-width: 1px;
     border-color: #332f2e;
+    position: relative;
+}
+
+#previewImageLabel {
+    position: absolute;
+    top: -5px;
+    left: -3px;
+    padding: 2px 5px;
+    font-size: 14px;
+    border-radius: 6px;
+    background-color: rgba(47, 47, 47, 1);
 }
 
 /* Container for user controls */
@@ -106,18 +117,18 @@
 /* Shared button appearance */
 #applyButton,
 #resetButton {
-    height: 36px;
+    height: 28px;
     min-width: 80px;
-    flex-grow: 1;
-    -unity-font-style: bold;
-    font-size: 13px;
-    color: white;
     border-radius: 6px;
     border-width: 1px;
 }
 
 /* Button colors */
 #applyButton {
+    font-size: 13px;
+    flex-grow: 1;
+    -unity-font-style: bold;
+    border-color: #387e54;
     background-color: #3FAF6C;
 }
 
@@ -126,7 +137,10 @@
 }
 
 #resetButton {
-    background-color: #B44A4A;
+    font-size: 11.5px;
+    border-width: 2px;
+    border-color: #B44A4A;
+    background-color: transparent;
 }
 #resetButton:hover {
     background-color: #CC5E5E;
