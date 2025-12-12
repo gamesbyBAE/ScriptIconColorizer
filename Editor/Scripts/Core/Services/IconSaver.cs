@@ -2,6 +2,7 @@ using System.IO;
 using System.Reflection;
 using UnityEngine;
 using UnityEditor.PackageManager;
+using System;
 
 namespace BasementExperiments.ScriptIconCustomiser
 {
@@ -78,8 +79,16 @@ namespace BasementExperiments.ScriptIconCustomiser
 
             if (!File.Exists(filePath))
             {
-                File.WriteAllBytes(filePath, textureToSave.EncodeToPNG());
-                UnityEditor.AssetDatabase.Refresh();
+                try
+                {
+                    File.WriteAllBytes(filePath, textureToSave.EncodeToPNG());
+                    UnityEditor.AssetDatabase.Refresh();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"[FAIL]: Could not save icon to disk.\n{e}");
+                    return null;
+                }
             }
 
             return filePath;
