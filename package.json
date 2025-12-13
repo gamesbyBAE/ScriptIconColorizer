@@ -1,6 +1,6 @@
 {
   "name": "com.basement-experiments.script-icon-customiser",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "displayName": "Script Icon Customiser",
   "description": "Editor util to customise Script icon and/or it's color.",
   "unity": "2021.3",

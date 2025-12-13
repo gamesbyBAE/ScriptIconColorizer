@@ -14,13 +14,13 @@ namespace BasementExperiments.ScriptIconCustomiser
 
         public IconSaver()
         {
-            Assembly editorAssembly = Assembly.GetExecutingAssembly();
-            var packageInfo = PackageInfo.FindForAssembly(editorAssembly);
-            if (packageInfo != null)
-            {
-                iconsDirName = Path.Combine("Packages", packageInfo.name, iconsDirectory);
-                return;
-            }
+            // Assembly editorAssembly = Assembly.GetExecutingAssembly();
+            // var packageInfo = PackageInfo.FindForAssembly(editorAssembly);
+            // if (packageInfo != null)
+            // {
+            //     iconsDirName = Path.Combine("Packages", packageInfo.name, iconsDirectory);
+            //     return;
+            // }
 
             iconsDirName = Path.Combine("Assets", iconsDirectory);
         }
