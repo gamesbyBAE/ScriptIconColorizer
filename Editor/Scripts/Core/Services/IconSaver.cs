@@ -10,20 +10,19 @@ namespace BasementExperiments.ScriptIconCustomiser
     {
         private readonly string iconsDirName;
         private readonly string iconFileName = "d3rp_<textureName>_<color>";
+        private readonly string iconsDirectory = "CustomScriptIcons";
 
         public IconSaver()
         {
             Assembly editorAssembly = Assembly.GetExecutingAssembly();
             var packageInfo = PackageInfo.FindForAssembly(editorAssembly);
-
             if (packageInfo != null)
             {
-                iconsDirName = Path.Combine("Packages", packageInfo.name, "Icons");
+                iconsDirName = Path.Combine("Packages", packageInfo.name, iconsDirectory);
+                return;
             }
-            else
-            {
-                Debug.LogError("[FAIL]: Couldn't find the package path. Is this script inside a UPM package?");
-            }
+
+            iconsDirName = Path.Combine("Assets", iconsDirectory);
         }
         public string SaveIcon(IconContext iconContext)
         {
