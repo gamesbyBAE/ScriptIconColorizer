@@ -1,7 +1,5 @@
 using System.IO;
-using System.Reflection;
 using UnityEngine;
-using UnityEditor.PackageManager;
 using System;
 
 namespace BasementExperiments.ScriptIconCustomiser
@@ -10,20 +8,12 @@ namespace BasementExperiments.ScriptIconCustomiser
     {
         private readonly string iconsDirName;
         private readonly string iconFileName = "d3rp_<textureName>_<color>";
-        private readonly string iconsDirectory = "CustomScriptIcons";
 
         public IconSaver()
         {
-            // Assembly editorAssembly = Assembly.GetExecutingAssembly();
-            // var packageInfo = PackageInfo.FindForAssembly(editorAssembly);
-            // if (packageInfo != null)
-            // {
-            //     iconsDirName = Path.Combine("Packages", packageInfo.name, iconsDirectory);
-            //     return;
-            // }
-
-            iconsDirName = Path.Combine("Assets", iconsDirectory);
+            iconsDirName = Path.Combine("Assets", "BasementExperiments", "CustomScriptIcons");
         }
+
         public string SaveIcon(IconContext iconContext)
         {
             switch (iconContext.IconType)
@@ -69,7 +59,8 @@ namespace BasementExperiments.ScriptIconCustomiser
             string fileName,
             string fileExtension = "png")
         {
-            if (textureToSave == null || string.IsNullOrEmpty(fileName)) return null;
+            if (textureToSave == null || string.IsNullOrEmpty(fileName))
+                return null;
 
             // Creates directory if doesn't exist.
             Directory.CreateDirectory(iconsDirName);
