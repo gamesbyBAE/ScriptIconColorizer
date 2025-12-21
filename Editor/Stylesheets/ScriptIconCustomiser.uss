@@ -98,8 +98,7 @@
 #scriptListArea {
     margin: 12px 2px 0px; /* top right+left bottom */
     background-color: #2f2f2f;
-    height: 300px;
-    max-height: 300px;
+    height: 210px;
     padding: 5px;
     border-radius: 8px;
     border-width: 1px;

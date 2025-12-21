@@ -34,7 +34,7 @@ namespace BasementExperiments.ScriptIconCustomiser
                 showBorder = true,
                 showAlternatingRowBackgrounds = AlternatingRowBackground.All,
                 selectionType = SelectionType.Multiple,
-                virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight,
+                virtualizationMethod = CollectionVirtualizationMethod.FixedHeight,
                 horizontalScrollingEnabled = false,
                 viewDataKey = "targetScriptsList" // Responsible for data persistence
             };
@@ -47,9 +47,14 @@ namespace BasementExperiments.ScriptIconCustomiser
 
         private List<Object> InitialiseList(TargetScriptsPersistence targetsPersistence)
         {
-            List<Object> savedScripts = targetsPersistence.LoadScriptsFromPrefs();
-            if (savedScripts.Count > 0)
-                return savedScripts;
+            if (targetsPersistence != null)
+            {
+                List<Object> savedScripts = targetsPersistence.LoadScriptsFromPrefs();
+                if (savedScripts.Count > 0)
+                {
+                    return savedScripts;
+                }
+            }
 
             List<Object> selectedScripts = Utils.GetSelectedScripts();
             return selectedScripts ?? new List<Object>();
@@ -95,15 +100,24 @@ namespace BasementExperiments.ScriptIconCustomiser
 
             scriptField.userData = index;
             scriptField.UnregisterValueChangedCallback(OnScriptFieldChanged);
-            scriptField.SetValueWithoutNotify(index < TargetScripts.Count ? TargetScripts[index] : null);
+            scriptField.SetValueWithoutNotify(
+                (TargetScripts != null && index < TargetScripts.Count)
+                ? TargetScripts[index]
+                : null);
             scriptField.RegisterValueChangedCallback(OnScriptFieldChanged);
         }
 
         private void OnScriptFieldChanged(ChangeEvent<Object> evt)
         {
-            if (evt.target is ObjectField scriptField && scriptField.userData is int index)
-                if (index >= 0 && index < TargetScripts.Count)
-                    TargetScripts[index] = evt.newValue;
+            if (evt.target is not ObjectField scriptField
+                || scriptField.userData is not int index
+                || TargetScripts == null)
+            {
+                return;
+            }
+
+            if (index >= 0 && index < TargetScripts.Count)
+                TargetScripts[index] = evt.newValue;
         }
 
         private void OnDragUpdated(DragUpdatedEvent evt)
@@ -132,8 +146,8 @@ namespace BasementExperiments.ScriptIconCustomiser
                 return;
             }
 
-            TargetScripts.AddRange(droppedMonoScripts);
-            targetScriptsListView.Rebuild();
+            TargetScripts?.AddRange(droppedMonoScripts);
+            targetScriptsListView?.Rebuild();
             DragAndDrop.AcceptDrag();
         }
 

@@ -1,19 +1,25 @@
-# Script Icon Customiser
+# Script Icon Customiser ![C#](https://img.shields.io/badge/C%23-grey?style=flat) ![Unity](https://img.shields.io/badge/Unity-2021.3%2B-blue?style=flat&logo=unity) ![MIT](https://img.shields.io/badge/license-MIT-blue?style=flat) ![GitHub repo size](https://img.shields.io/github/repo-size/gamesbyBAE/script-icon-customiser?style=flat&color=green)
 
-**Customise script assets icon and/or their tint color** in the Unity Editor.
+Customise script assets icon and/or their tint color in the Unity Editor.
 
-- Package: `com.basement-experiments.script-icon-customiser`
+## Table of Contents
 
-- Version: `0.1.2`
-- Author: Mayank _'DerperDoing'_ Bagchi (www.mayankbagchi.dev)
-- Unity Compatibility: Unity 2021.3 LTS or newer (recommended Unity 6000.3)
-- License: MIT
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Installation](#installation)
+  - [Option 1: Unity Package Manager (Recommended)](#option-1-install-via-unity-package-manager-git-url---recommended)
+  - [Option 2: manifest.json](#option-2-install-via-manifestjson)
+  - [Option 3: Local Package](#option-3-install-via-local-package-clone-repository)
+- [Usage](#usage)
+  - [Change Icon](#steps-to-apply-custom-icon)
+  - [Restore Icon](#steps-to-restore-default-icon)
+- [Code References](#code-references)
+- [Notes](#notes)
+- [Contributions](#contributions)
+- [License](#license)
+- [Contact](#contact)
 
-![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=csharp&logoColor=white)
-![Unity](https://img.shields.io/badge/unity-%23000000.svg?style=for-the-badge&logo=unity&logoColor=white)
-![GitHub repo size](https://img.shields.io/github/repo-size/gamesbyBAE/script-icon-customiser?style=for-the-badge)
-
-## 🔍 Overview
+## Overview
 
 `Script Icon Customiser` provides a small Unity Editor utility window that allows you to:-
 
@@ -23,16 +29,21 @@
 You can customise & apply a new icon to one or multiple selected scripts by either:-
 
 1. choosing a custom icon texture from you project assets and/or apply a tint color to further customise it,
-2. or simply changing the color of the default Unity script icon.
+2. or simply changing the color (tint) of the default Unity script icon.
 
-## ⭐ Key Features
+## Key Features
 
+- Clean UI built with UIElements (VisualElement + USS).
 - The icon is reflected in the Unity Inspector and everywhere in Unity Editor.
 - Move your custom Texture2D icon asset within the project safely without script icons reverting to default.
 - Quick restore to Unity default icon.
-- Clean UI built with UIElements (VisualElement + USS).
+- Exists only in the Editor, nothing's packaged into the build.
 
-## 📦 Installation
+## Installation
+
+> [!NOTE]
+> Recommended Unity Editor version `6000.3+`, albeit supports `2021.3+`.\
+> Some UI alignments might be iffy in Editor versions below 6000.3 but does the job it's meant to.
 
 #### Option 1: Install via Unity Package Manager (Git URL) - Recommended
 
@@ -56,6 +67,8 @@ https://github.com/gamesbyBAE/script-icon-customiser.git
 
 7. Unity will download and install the package automatically.
 
+---
+
 #### Option 2: Install via manifest.json
 
 1. Open your Unity project.
@@ -76,8 +89,10 @@ Path/Of/Your/UnityProject/Packages/manifest.json
 }
 ```
 
-4. Save the file and return to Unity.<br>
+4. Save the file and return to Unity.\
    Unity will automatically resolve and install the package.
+
+---
 
 #### Option 3: Install via Local Package (Clone Repository)
 
@@ -103,7 +118,7 @@ git clone https://github.com/gamesbyBAE/script-icon-customiser.git
 
 _Note:_ Local packages are linked to the folder on disk. Any changes made to the package files will immediately reflect in Unity. Hence, good for modding the package and testing.
 
-## 🖱 Usage
+## Usage
 
 #### Steps to Apply Custom Icon:
 
@@ -139,9 +154,9 @@ _Note:_ Local packages are linked to the folder on disk. Any changes made to the
       2. You can drag & drop more scripts to be modified in the `Target Scripts` area.
       3. Click `Restore` to set the default Unity MonoScript asset icon.
 
-## 🗂️ UI & Code Reference
+## Code References
 
-Main files:
+- [ScriptIconCustomiser.uss](Editor/Stylesheets/ScriptIconCustomiser.uss) - Unity Style Sheet (USS) for customising the window's appearance.
 
 - [ScriptIconChangerWindow.cs](Editor/Scripts/ScriptIconChangerWindow.cs) - EditorWindow and menu hooks.
 - [WindowPresenter.cs](Editor/Scripts/Presenter/WindowPresenter.cs) - Creates [views](Editor/Scripts/Views), builds layout, coordinates events & views.
@@ -149,28 +164,34 @@ Main files:
   - [IconGenerator.cs](Editor/Scripts/Core/Services/IconGenerator.cs) - Fetches the default Unity icon, generates only the tinted icons (copies and tints) else passes the stock user Texture2D.
   - [IconSaver.cs](Editor/Scripts/Core/Services/IconSaver.cs) - Saves generated icons under `Assets/BasementExperiments/CustomScriptIcons` folder.
   - [IconApplier.cs](Editor/Scripts/Core/Services/IconApplier.cs) - Applies icon using `MonoImporter`.
-- [ScriptIconCustomiser.uss](Editor/Stylesheets/ScriptIconCustomiser.uss) - Unity Style Sheet (USS) for customising the window's appearance.
 
-## ⚠️ Notes & Tips
+## Notes
 
 - The utility modifies the icon set via `MonoImporter.SetIcon` followed by `SaveAndReimport()`, which may trigger a reimport for the asset(s). This is normal.
-- Icon textures that are tinted and not in their stock form are saved to `Assets/BasementExperiments/CustomScriptIcons`. It's necessary to save in the project because Unity needs the GUID to map the icon to the project asset.<br>
-  For the case, you installed the package from your local disk, it's possible to directly save the icons in the package directory itself without bloating your actual Unity project.
 
-## 🛠 Development & Contribution
+- Icon textures that are tinted and _not_ in their stock form are saved to the directory, `Assets/BasementExperiments/CustomScriptIcons`.
+  - Necessary to save in the project because Unity uses the GUID to map the icon to the project asset.
+  - For the case, package is installed from local disk, it's possible to directly save the icons in the package directory itself without bloating your actual Unity project directory.
 
-- Clone the repo and install it as local package in Unity (2021.3 LTS or newer).<br>
-  Check [Option #3 of Installation](#option-3-install-via-local-package-clone-repository) for more info.
-- Explore the code under `Editor/Scripts` for logic and `Editor/Stylesheets` to modify styles.
-- Run the window from the menu `Assets ➜ Script Icon ➜ Change Icon`.
-- Contributions welcome via PRs - fixes, performance improvements, or feature additions.
+## Contributions
 
-## 📜 License
+Contributions welcome via PRs - fixes, performance improvements, or feature additions.
+
+1. Open a new Unity project.
+2. Create a new directory in the project's Assets directory, `Assets ➜ <your-directory-name>`
+3. Clone the repository into this newly created directory.
+4. Explore the code under `Editor/Scripts` for logic and `Editor/Stylesheets` to modify styles.\
+   All the scripts _must_ live inside the `Editor` directory.
+5. Run the window from the menu, `Assets ➜ Script Icon ➜ Change Icon`.
+
+## License
 
 MIT, see [LICENSE](LICENSE) in this folder.
 
-## 🫱🏼‍🫲🏽 Contact
+## Contact
 
-Mayank _'DerperDoing'_ Bagchi - www.mayankbagchi.dev
+Mayank _'DerperDoing'_ Bagchi\
+www.mayankbagchi.dev
 
-![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCnFsX4GcmDx1hDbpTC9NYow)
+![Medium](https://img.shields.io/badge/Medium%20-%20black?style=flat&logo=medium&link=https%3A%2F%2Fderperdoing.medium.com%2F)
+![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCnFsX4GcmDx1hDbpTC9NYow?style=flat&logo=youtube&logoColor=ff0132&label=Views&labelColor=f2f2f2&color=ff0132)

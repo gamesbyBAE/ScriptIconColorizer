@@ -16,7 +16,7 @@ namespace BasementExperiments.ScriptIconCustomiser
             var window = GetWindow<ScriptIconChangerWindow>(utility: true);
             window.ShowUtility();
 
-            window.maxSize = window.minSize = new(250, 700);
+            window.maxSize = window.minSize = new(250, 600);
 
             // Changing the window's name and icon.
             // Note: Icon visible only on a regular dockable window & not on a UtilityWindow.

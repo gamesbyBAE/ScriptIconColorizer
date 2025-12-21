@@ -1,10 +1,12 @@
 {
   "name": "com.basement-experiments.script-icon-customiser",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "displayName": "Script Icon Customiser",
-  "description": "Unity Editor util to customise Script icon and/or it's color.",
+  "description": "Unity Editor tool to customise C# Script assets icon and/or color.",
   "unity": "2021.3",
   "keywords": [
+    "caharp",
+    "c#",
     "script",
     "icon",
     "customise",
